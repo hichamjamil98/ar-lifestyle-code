@@ -1,0 +1,199 @@
+
+/* ==========================================================================
+   GLOBAL FIXES
+========================================================================== */
+
+html.is--locked,
+body.is--locked {
+  overflow: hidden !important;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   BUTTON CHARACTER HOVER
+========================================================================== */
+
+[data-button-animate-chars] {
+  display: inline-block;
+  overflow: hidden;
+}
+
+[data-button-animate-chars] span {
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 1.25em currentColor;
+  transform: translateY(0);
+  transition: transform 0.55s cubic-bezier(0.625, 0.05, 0, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover [data-button-animate-chars] span,
+  .nav--link:hover [data-button-animate-chars] span,
+  .nav--left:hover [data-button-animate-chars] span {
+    transform: translateY(-1.25em);
+  }
+}
+
+/* ==========================================================================
+   BTN ROD HOVER
+========================================================================== */
+
+.btn--wrapper {
+  cursor: pointer;
+}
+
+.btn--rod {
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   SIDE NAV
+========================================================================== */
+
+.side--nav {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.side--nav.is--open {
+  pointer-events: auto;
+}
+
+.side--nav-menu {
+  will-change: transform, opacity;
+}
+
+.nav--left.is--menu-open,
+.nav--left.is--menu-open .menu--to-open,
+.nav--left.is--menu-open .menu--to-close {
+  color: #FDFDFD !important;
+}
+
+/* ==========================================================================
+   MENU ICONS
+========================================================================== */
+
+.menu--trigger {
+  position: relative;
+}
+
+.menu--to-open,
+.menu--to-close {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: currentColor;
+  transition: none;
+}
+
+.menu--to-close {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.75) rotate(-90deg);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   SIDE NAV DESKTOP HOVER
+========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .side--nav-menu .nav--link {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .side--nav-menu:hover .nav--link {
+    opacity: 0.45;
+  }
+
+  .side--nav-menu .nav--link:hover {
+    opacity: 1;
+    transform: translateX(0.4rem);
+  }
+}
+
+/* ==========================================================================
+   LOAD ANIMATIONS
+========================================================================== */
+
+[animation="load"],
+[animation="load-up"],
+[animation="load-left"],
+[animation="load-right"],
+[animation="load-split"] {
+  will-change: transform, opacity;
+}
+
+[animation="load-split"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.load-split__line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.load-split__line {
+  display: block;
+}
+
+/* ==========================================================================
+   FADE / SPLIT ANIMATIONS
+========================================================================== */
+
+[animation="fade"],
+[animation="fade-up"],
+[animation="fade-left"],
+[animation="fade-right"],
+[animation="fade-stagger"] > *,
+[animation="fade-split"] {
+  will-change: transform, opacity;
+}
+
+[animation="fade-split"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.fade-split__line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.fade-split__line {
+  display: block;
+}
+
+/* ==========================================================================
+   VIMEO BASIC STATES
+========================================================================== */
+
+.vimeo-player {
+  position: relative;
+}
+
+.vimeo-player__iframe {
+  width: 100%;
+  height: 100%;
+}
+
+.vimeo-player[data-vimeo-playing="true"] .vimeo-player__play {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vimeo-player[data-vimeo-playing="false"] .vimeo-player__pause {
+  display: none;
+}
+
+.vimeo-player[data-vimeo-loaded="true"] .vimeo-player__placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
