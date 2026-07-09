@@ -251,3 +251,63 @@ document.addEventListener("DOMContentLoaded", () => {
   
     setActiveVideo("1");
   });
+  
+  
+  /* ==========================================================================
+     HOME EXPERIENCES SWIPER
+  ========================================================================== */
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof Swiper === "undefined") return;
+  
+    const swiperEl = document.querySelector(".swiper.is--home");
+    if (!swiperEl) return;
+  
+    const indicator = document.querySelector(
+      ".swiper--pagination.is--home .pagination--indicator"
+    );
+  
+    const homeSwiper = new Swiper(swiperEl, {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      speed: 800,
+      loop: true,
+      grabCursor: true,
+      watchOverflow: true,
+  
+      observer: true,
+      observeParents: true,
+  
+      keyboard: {
+        enabled: true,
+        onlyInViewport: true
+      },
+  
+      autoplay: {
+        delay: 4000,
+        disableOnInteraction: false
+      },
+  
+      on: {
+        init: function () {
+          updateHomeSwiperProgress(this);
+        },
+        slideChange: function () {
+          updateHomeSwiperProgress(this);
+        }
+      }
+    });
+  
+    function updateHomeSwiperProgress(swiper) {
+      if (!indicator) return;
+  
+      const totalSlides = swiper.slides.filter(function (slide) {
+        return !slide.classList.contains("swiper-slide-duplicate");
+      }).length;
+  
+      const currentIndex = swiper.realIndex + 1;
+      const progress = currentIndex / totalSlides;
+  
+      indicator.style.transform = "scaleX(" + progress + ")";
+    }
+  });

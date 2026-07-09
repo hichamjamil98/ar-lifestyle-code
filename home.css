@@ -121,3 +121,70 @@ body.is-loading {
   height: 100%;
   transform-origin: left center;
 }
+
+
+/* ==========================================================================
+   HOME EXPERIENCES SWIPER
+========================================================================== */
+
+.swiper.is--home {
+  width: 100%;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.swiper.is--home:active {
+  cursor: grabbing;
+}
+
+.swiper.is--home .swiper-wrapper {
+  width: 100%;
+  align-items: stretch;
+}
+
+.swiper.is--home .swiper-slide {
+  width: 100% !important;
+  flex-shrink: 0;
+  height: auto;
+}
+
+.swiper.is--home .experience--content {
+  width: 100%;
+  height: 100%;
+}
+
+.experience--image-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.image--absolute100 {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ==========================================================================
+   HOME SWIPER PAGINATION PROGRESS
+========================================================================== */
+
+.swiper--pagination.is--home {
+  width: 100%;
+}
+
+.swiper--progress {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+}
+
+.pagination--indicator {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(.22, 1, .36, 1);
+  background: currentColor;
+}
