@@ -1,0 +1,123 @@
+/* ==========================================================================
+   LOADING SCREEN
+========================================================================== */
+
+html.is-loading,
+body.is-loading {
+  overflow: hidden !important;
+}
+
+.loading--screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FDFDFD;
+  clip-path: inset(0% 0% 0% 0%);
+  will-change: clip-path, opacity;
+}
+
+.loading--screen .image--absolute100 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading--title {
+  position: relative;
+  z-index: 5;
+  width: 5rem;
+}
+
+.brand--loading {
+  display: block;
+  width: 100% !important;
+  height: auto;
+}
+
+.main-wrapper,
+.navbar {
+  opacity: 0;
+}
+
+
+/* ==========================================================================
+   HERO VIMEO COVER
+========================================================================== */
+
+.video-bg-absolute {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.video-bg-absolute iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+
+/* ==========================================================================
+   HERO VIDEO SWITCH
+========================================================================== */
+
+.home--video-wrapper {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.home--video-wrapper.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.hero--video-play {
+  cursor: pointer;
+  transition: opacity 0.35s ease, color 0.35s ease;
+}
+
+.hero--video-play .arrow--8 {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.hero--video-play p {
+  opacity: 0.4;
+  transition: opacity 0.35s ease;
+}
+
+.hero--video-play.is-active .arrow--8 {
+  opacity: 1;
+}
+
+.hero--video-play.is-active p {
+  opacity: 1;
+}
+
+
+/* ==========================================================================
+   HERO VIDEO PROGRESS
+========================================================================== */
+
+.progress--indicator {
+  width: 0%;
+  height: 100%;
+  transform-origin: left center;
+}
