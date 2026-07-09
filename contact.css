@@ -1,0 +1,152 @@
+
+/* ==========================================================================
+   PHONE FIELD - INTL TEL INPUT
+========================================================================== */
+
+.iti {
+  width: 100%;
+  position: relative !important;
+  z-index: 20;
+}
+
+/* Input téléphone */
+.iti input,
+.iti input[type="tel"] {
+  width: 100% !important;
+  height: 100% !important;
+  padding-left: 6rem !important;
+}
+
+/* ==========================================================================
+   SELECTED COUNTRY
+========================================================================== */
+
+.iti__country-container {
+  left: 1.25rem !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.iti__selected-country {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  padding: 0 !important; /* ← modifié */
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+.iti__selected-country-primary {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  padding: 0 !important; /* ← modifié */
+}
+
+.iti__selected-dial-code {
+  margin: 0 !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+}
+
+.iti__arrow {
+  margin: 0 !important;
+}
+
+/* ==========================================================================
+   DROPDOWN
+========================================================================== */
+
+.iti__dropdown-content {
+  z-index: 999999 !important;
+  width: 26rem !important;
+  max-width: 90vw !important;
+  background: #f5eee7 !important;
+  color: #333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.16) !important;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.18) !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+}
+
+.iti__country-container .iti__dropdown-content {
+  left: 0 !important;
+  top: 100% !important;
+}
+
+/* ==========================================================================
+   SEARCH
+========================================================================== */
+
+.iti__search-input-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 3.5rem !important;
+  padding: 0.5rem 0.75rem !important;
+  background: #f5eee7 !important;
+}
+
+.iti__search-icon {
+  left: 1rem !important;
+  z-index: 2 !important;
+}
+
+.iti__search-input {
+  width: 100% !important;
+  height: 2.5rem !important;
+  padding: 0 1rem 0 2.4rem !important;
+  background: #fff !important;
+  color: #333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+  border-radius: 0.25rem !important;
+  font-size: inherit !important;
+  line-height: 1 !important;
+}
+
+/* ==========================================================================
+   COUNTRY LIST
+========================================================================== */
+
+.iti__country-list {
+  max-height: 24rem !important;
+  background: #f5eee7 !important;
+}
+
+.iti__country {
+  display: grid !important;
+  grid-template-columns: 1.5rem 1fr auto !important;
+  align-items: center !important;
+  column-gap: 1rem !important;
+  padding: 0.85rem 1rem !important;
+  background: #f5eee7 !important;
+  opacity: 1 !important;
+}
+
+.iti__country:hover,
+.iti__country.iti__highlight {
+  background: #e8dfd6 !important;
+}
+
+.iti__country-name,
+.iti__dial-code {
+  color: #333 !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   FLAGS FIX
+========================================================================== */
+
+.iti__flag {
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  transform: none !important;
+}
