@@ -172,30 +172,274 @@ body {
 }
 
 /* ==========================================================================
-   VIMEO BASIC STATES
+   VIMEO PLAYER
 ========================================================================== */
 
-.vimeo-player {
-  position: relative;
-}
-
-.vimeo-player__iframe {
+/* Cover */
+.vimeo-player[data-vimeo-update-size="cover"] {
   width: 100%;
+  min-width: 100%;
+  max-width: 100%;
   height: 100%;
+  min-height: 100%;
+  max-height: 100%;
 }
 
-.vimeo-player[data-vimeo-playing="true"] .vimeo-player__play {
+/* Placeholder */
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-loaded="true"]
+  .vimeo-player__placeholder {
   opacity: 0;
-  pointer-events: none;
 }
 
-.vimeo-player[data-vimeo-playing="false"] .vimeo-player__pause {
+/* Dark (Overlay) */
+.vimeo-player[data-vimeo-playing="false"] .vimeo-player__dark {
+  opacity: 0.33;
+}
+
+.vimeo-player[data-vimeo-activated="false"][data-vimeo-playing="false"]
+  .vimeo-player__dark {
+  opacity: 0;
+}
+
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-loaded="true"]
+  .vimeo-player__dark {
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .vimeo-player[data-vimeo-hover="true"]:hover .vimeo-player__dark {
+    opacity: 0.33 !important;
+  }
+}
+
+/* Pause */
+.vimeo-player .vimeo-player__pause {
   display: none;
 }
 
-.vimeo-player[data-vimeo-loaded="true"] .vimeo-player__placeholder {
+.vimeo-player[data-vimeo-playing="true"] .vimeo-player__pause {
+  display: flex;
+}
+
+.vimeo-player .vimeo-player__pause .vimeo-player__btn {
   opacity: 0;
-  pointer-events: none;
+}
+
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-playing="false"]
+  .vimeo-player__pause
+  .vimeo-player__btn,
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-hover="true"]:hover
+  .vimeo-player__pause
+  .vimeo-player__btn {
+  opacity: 1;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .vimeo-player[data-vimeo-activated="true"][data-vimeo-playing="true"]
+    .vimeo-player__pause
+    .vimeo-player__btn {
+    opacity: 0 !important;
+  }
+}
+
+/* Play */
+.vimeo-player[data-vimeo-playing="true"] .vimeo-player__play {
+  opacity: 0;
+}
+
+/* Loading */
+.vimeo-player .vimeo-player__loading {
+  opacity: 0;
+}
+
+.vimeo-player[data-vimeo-playing="true"] .vimeo-player__loading {
+  opacity: 1;
+}
+
+.vimeo-player[data-vimeo-playing="true"][data-vimeo-loaded="true"]
+  .vimeo-player__loading {
+  opacity: 0;
+}
+
+/* Interface */
+.vimeo-player .vimeo-player__interface {
+  opacity: 0;
+}
+
+.vimeo-player .vimeo-player__interface * {
+  pointer-events: all;
+}
+
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-playing="false"]
+  .vimeo-player__interface,
+.vimeo-player[data-vimeo-activated="true"][data-vimeo-hover="true"]:hover
+  .vimeo-player__interface {
+  opacity: 1;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .vimeo-player[data-vimeo-activated="true"][data-vimeo-playing="true"]
+    .vimeo-player__interface {
+    opacity: 0 !important;
+  }
+}
+
+/* Interface - Variables */
+.vimeo-player {
+  --timeline-rounded-corners: 1.5em;
+  --timeline-dot-height: 0.75em;
+  --timeline-dot-color: #ffffff;
+  --progress-bg: rgba(239, 238, 236, 0.2);
+  --progress-fill-bg: #ffffff;
+  --progress-height: 0.2em;
+}
+
+/* Interface - Timeline */
+.vimeo-player progress::-webkit-progress-bar {
+  border-radius: var(--timeline-rounded-corners);
+  background-color: var(--progress-bg);
+  box-shadow: 0;
+}
+
+.vimeo-player progress::-webkit-progress-value {
+  background: var(--progress-fill-bg);
+}
+
+.vimeo-player progress::-moz-progress-bar {
+  border-radius: var(--timeline-rounded-corners);
+  background: var(--progress-fill-bg);
+  box-shadow: 0;
+}
+
+.vimeo-player progress::-ms-fill {
+  border-radius: var(--timeline-rounded-corners);
+}
+
+/* Interface - Range */
+.vimeo-player [type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+.vimeo-player [type="range"]:focus {
+  outline: none;
+}
+
+.vimeo-player [type="range"]::-ms-track {
+  width: 100%;
+  cursor: pointer;
+  background-color: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+.vimeo-player [type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: var(--progress-height);
+  cursor: pointer;
+  background-color: var(--progress-bg);
+  border-radius: var(--timeline-rounded-corners);
+  background-color: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+.vimeo-player [type="range"]::-webkit-slider-thumb {
+  box-shadow: 0;
+  height: var(--timeline-dot-height);
+  width: var(--timeline-dot-height);
+  border-radius: var(--timeline-rounded-corners);
+  background-color: var(--timeline-dot-color);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: calc(
+    (var(--progress-height) / 2) - (var(--timeline-dot-height) / 2)
+  );
+}
+
+.vimeo-player [type="range"]::-webkit-slider-runnable-track,
+.vimeo-player [type="range"]:focus::-webkit-slider-runnable-track {
+  background-color: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+.vimeo-player [type="range"]::-moz-range-track {
+  width: 100%;
+  height: var(--progress-height);
+  cursor: pointer;
+  background: var(--progress-bg);
+  border-radius: 0;
+  border: 0;
+  border-radius: var(--timeline-rounded-corners);
+  overflow: hidden;
+  opacity: 1 !important;
+}
+
+.vimeo-player [type="range"]::-moz-range-thumb {
+  box-shadow: 0;
+  border: 0;
+  height: var(--timeline-dot-height);
+  width: var(--timeline-dot-height);
+  border-radius: var(--timeline-rounded-corners);
+  background: var(--timeline-dot-color);
+  cursor: pointer;
+  box-shadow: 0;
+}
+
+/* Interface - Mute */
+.vimeo-player .vimeo-player__mute svg:nth-child(2),
+.vimeo-player[data-vimeo-muted="true"] .vimeo-player__mute svg:nth-child(1) {
+  display: none;
+}
+
+.vimeo-player .vimeo-player__mute svg:nth-child(1),
+.vimeo-player[data-vimeo-muted="true"] .vimeo-player__mute svg:nth-child(2) {
+  display: block;
+}
+
+/* Interface - Fullscreen */
+.vimeo-player .vimeo-player__fullscreen svg:nth-child(2),
+.vimeo-player[data-vimeo-fullscreen="true"]
+  .vimeo-player__fullscreen
+  svg:nth-child(1) {
+  display: none;
+}
+
+.vimeo-player .vimeo-player__fullscreen svg:nth-child(1),
+.vimeo-player[data-vimeo-fullscreen="true"]
+  .vimeo-player__fullscreen
+  svg:nth-child(2) {
+  display: block;
+}
+
+/* ==========================================================================
+   VIMEO BACKGROUND VIDEO
+========================================================================== */
+
+/* Placeholder */
+.vimeo-bg[data-vimeo-activated="true"][data-vimeo-loaded="true"]
+  .vimeo-bg__placeholder {
+  opacity: 0;
+  transition-delay: 0.2s;
+}
+
+/* Play/Pause */
+.vimeo-bg .vimeo-bg__pause {
+  display: none;
+}
+
+.vimeo-bg[data-vimeo-playing="true"] .vimeo-bg__pause {
+  display: flex;
+}
+
+.vimeo-bg[data-vimeo-playing="true"] .vimeo-bg__pause,
+.vimeo-bg[data-vimeo-playing="false"] .vimeo-bg__play {
+  opacity: 1;
+}
+
+.vimeo-bg[data-vimeo-playing="true"] .vimeo-bg__play,
+.vimeo-bg[data-vimeo-playing="false"] .vimeo-bg__pause {
+  opacity: 0;
 }
 
 /* ==========================================================================
