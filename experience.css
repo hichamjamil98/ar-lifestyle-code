@@ -1,0 +1,260 @@
+
+/* ==========================================================================
+   GALLERY SECTION
+========================================================================== */
+
+.section:has(.swiper.is--gallery) {
+  overflow: hidden;
+}
+
+
+/* ==========================================================================
+   GALLERY SWIPER
+========================================================================== */
+
+.swiper.is--gallery {
+  position: relative;
+  width: 100%;
+  overflow: visible !important;
+  cursor: grab;
+}
+
+.swiper.is--gallery:active {
+  cursor: grabbing;
+}
+
+.swiper.is--gallery .swiper-wrapper {
+  align-items: center;
+  overflow: visible !important;
+}
+
+
+/* ==========================================================================
+   GALLERY SLIDES
+========================================================================== */
+
+.swiper.is--gallery .swiper-slide {
+  width: 78% !important;
+  height: auto;
+  flex-shrink: 0;
+
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+
+  transition:
+    opacity 0.38s cubic-bezier(.22, 1, .36, 1);
+
+  will-change: opacity;
+}
+
+
+/* Slide active */
+
+.swiper.is--gallery .swiper-slide.is-gallery-active {
+  z-index: 3;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+/* Slides avant et après */
+
+.swiper.is--gallery .swiper-slide.is-gallery-prev,
+.swiper.is--gallery .swiper-slide.is-gallery-next {
+  z-index: 2;
+  opacity: 0.2;
+  pointer-events: auto;
+}
+
+
+/* ==========================================================================
+   GALLERY SCALE
+========================================================================== */
+
+.swiper.is--gallery .gallery--image-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+
+  transform: scale(0.82);
+
+  transition:
+    transform 0.38s cubic-bezier(.22, 1, .36, 1);
+
+  will-change: transform;
+}
+
+
+/* Slide active */
+
+.swiper.is--gallery
+.swiper-slide.is-gallery-active
+.gallery--image-wrapper {
+  transform: scale(1);
+  transform-origin: center center;
+}
+
+
+/* Slide précédente */
+
+.swiper.is--gallery
+.swiper-slide.is-gallery-prev
+.gallery--image-wrapper {
+  transform: scale(0.82);
+  transform-origin: right center;
+}
+
+
+/* Slide suivante */
+
+.swiper.is--gallery
+.swiper-slide.is-gallery-next
+.gallery--image-wrapper {
+  transform: scale(0.82);
+  transform-origin: left center;
+}
+
+
+/* ==========================================================================
+   GALLERY IMAGES
+========================================================================== */
+
+.swiper.is--gallery .image--absolute100 {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ==========================================================================
+   GALLERY PAGINATION
+========================================================================== */
+
+.swiper--pagination.is--gallery {
+  width: 24rem;
+  max-width: calc(100% - 3rem);
+  margin: 3rem auto 0;
+}
+
+.swiper--pagination.is--gallery .swiper--progress {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.18);
+}
+
+.swiper--pagination.is--gallery .pagination--indicator {
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+
+  transform: scaleX(0);
+  transform-origin: left center;
+
+  transition:
+    transform 0.38s cubic-bezier(.22, 1, .36, 1);
+
+  will-change: transform;
+}
+
+
+/* ==========================================================================
+   GALLERY TABLET
+========================================================================== */
+
+@media screen and (max-width: 991px) {
+  .swiper.is--gallery .swiper-slide {
+    width: 84% !important;
+  }
+
+  .swiper.is--gallery .gallery--image-wrapper {
+    transform: scale(0.86);
+  }
+
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-active
+  .gallery--image-wrapper {
+    transform: scale(1);
+  }
+
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-prev
+  .gallery--image-wrapper,
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-next
+  .gallery--image-wrapper {
+    transform: scale(0.86);
+  }
+
+  .swiper--pagination.is--gallery {
+    width: 20rem;
+    margin-top: 2.5rem;
+  }
+}
+
+
+/* ==========================================================================
+   GALLERY MOBILE
+========================================================================== */
+
+@media screen and (max-width: 767px) {
+  .swiper.is--gallery .swiper-slide {
+    width: 88% !important;
+  }
+
+  .swiper.is--gallery .gallery--image-wrapper {
+    transform: scale(0.9);
+  }
+
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-active
+  .gallery--image-wrapper {
+    transform: scale(1);
+  }
+
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-prev
+  .gallery--image-wrapper,
+  .swiper.is--gallery
+  .swiper-slide.is-gallery-next
+  .gallery--image-wrapper {
+    transform: scale(0.9);
+  }
+
+  .swiper--pagination.is--gallery {
+    width: calc(100% - 3rem);
+    margin-top: 2rem;
+  }
+}
+
+
+/* ==========================================================================
+   GALLERY INSTANT REPOSITION
+========================================================================== */
+
+/*
+ * Pendant la téléportation invisible, on désactive uniquement
+ * les transitions visuelles pendant une frame.
+ */
+
+.swiper.is--gallery.is-repositioning .swiper-slide,
+.swiper.is--gallery.is-repositioning .gallery--image-wrapper,
+.swiper.is--gallery.is-repositioning .pagination--indicator {
+  transition: none !important;
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION
+========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .swiper.is--gallery .swiper-slide,
+  .swiper.is--gallery .gallery--image-wrapper,
+  .swiper--pagination.is--gallery .pagination--indicator {
+    transition-duration: 0.01ms !important;
+  }
+}
