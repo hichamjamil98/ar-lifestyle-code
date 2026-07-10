@@ -120,53 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   
   /* ==========================================================================
-     HERO VIMEO COVER RESIZE
-  ========================================================================== */
-  
-  (function () {
-    const VIDEO_RATIO = 16 / 9;
-  
-    function resizeVimeoCover(wrapper) {
-      const iframe = wrapper.querySelector("iframe");
-      if (!iframe) return;
-  
-      const wrapperWidth = wrapper.offsetWidth;
-      const wrapperHeight = wrapper.offsetHeight;
-      const wrapperRatio = wrapperWidth / wrapperHeight;
-  
-      if (wrapperRatio > VIDEO_RATIO) {
-        iframe.style.width = wrapperWidth + "px";
-        iframe.style.height = wrapperWidth / VIDEO_RATIO + "px";
-      } else {
-        iframe.style.height = wrapperHeight + "px";
-        iframe.style.width = wrapperHeight * VIDEO_RATIO + "px";
-      }
-    }
-  
-    function initVimeoCovers() {
-      document.querySelectorAll("[data-vimeo-cover]").forEach((wrapper) => {
-        resizeVimeoCover(wrapper);
-      });
-    }
-  
-    window.addEventListener("load", initVimeoCovers);
-    window.addEventListener("resize", initVimeoCovers);
-  
-    if (window.ResizeObserver) {
-      document.querySelectorAll("[data-vimeo-cover]").forEach((wrapper) => {
-        new ResizeObserver(() => {
-          resizeVimeoCover(wrapper);
-        }).observe(wrapper);
-      });
-    }
-  })();
-  
-  
-  /* ==========================================================================
      HERO VIDEO SWITCH + PROGRESS
   ========================================================================== */
   
-  document.addEventListener("DOMContentLoaded", function () {
+  window.addEventListener("load", function () {
+    if (typeof Vimeo === "undefined") return;
+  
     const DURATION = 8;
   
     const videos = document.querySelectorAll("[video]");
@@ -182,12 +141,17 @@ document.addEventListener("DOMContentLoaded", () => {
   
     videos.forEach(function (videoWrapper) {
       const id = videoWrapper.getAttribute("video");
-      const iframe = videoWrapper.querySelector("iframe");
+      const vimeoBg = videoWrapper.querySelector(".vimeo-bg[data-vimeo-bg-init]");
   
-      if (iframe && window.Vimeo) {
-        players[id] = new Vimeo.Player(iframe);
-      }
+      if (!vimeoBg || !vimeoBg.id) return;
+  
+      players[id] = {
+        element: vimeoBg,
+        player: new Vimeo.Player(vimeoBg.id),
+      };
     });
+  
+    if (!Object.keys(players).length) return;
   
     function resetProgress() {
       if (!progress || typeof gsap === "undefined") return;
@@ -195,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (progressTween) progressTween.kill();
   
       gsap.set(progress, {
-        width: "0%"
+        width: "0%",
       });
   
       progressTween = gsap.to(progress, {
@@ -205,19 +169,23 @@ document.addEventListener("DOMContentLoaded", () => {
         repeat: -1,
         onRepeat: function () {
           playVideo(activeVideo);
-        }
+        },
       });
     }
   
     function playVideo(id) {
       Object.keys(players).forEach(function (key) {
-        const player = players[key];
+        const entry = players[key];
+        const isActive = key === id;
   
-        player.pause().catch(function () {});
-  
-        if (key === id) {
-          player.setCurrentTime(0).catch(function () {});
-          player.play().catch(function () {});
+        if (isActive) {
+          entry.element.setAttribute("data-vimeo-activated", "true");
+          entry.element.setAttribute("data-vimeo-playing", "true");
+          entry.player.setCurrentTime(0).catch(function () {});
+          entry.player.play().catch(function () {});
+        } else {
+          entry.element.setAttribute("data-vimeo-playing", "false");
+          entry.player.pause().catch(function () {});
         }
       });
     }

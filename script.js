@@ -825,6 +825,8 @@ function initVimeoPlayer() {
 ========================================================================== */
 
 function initVimeoBGVideo() {
+  if (typeof Vimeo === "undefined") return;
+
   const vimeoPlayers = document.querySelectorAll("[data-vimeo-bg-init]");
 
   vimeoPlayers.forEach(function (vimeoElement, index) {
@@ -890,17 +892,18 @@ function initVimeoBGVideo() {
 
     if (vimeoElement.getAttribute("data-vimeo-autoplay") === "false") {
       player.pause();
-    } else {
-      if (vimeoElement.getAttribute("data-vimeo-paused-by-user") === "false") {
-        function checkVisibility() {
-          const rect = vimeoElement.getBoundingClientRect();
-          const inView = rect.top < window.innerHeight && rect.bottom > 0;
-          inView ? vimeoPlayerPlay() : vimeoPlayerPause();
-        }
-
-        checkVisibility();
-        window.addEventListener("scroll", checkVisibility);
+    } else if (
+      !vimeoElement.closest("[video]") &&
+      vimeoElement.getAttribute("data-vimeo-paused-by-user") === "false"
+    ) {
+      function checkVisibility() {
+        const rect = vimeoElement.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight && rect.bottom > 0;
+        inView ? vimeoPlayerPlay() : vimeoPlayerPause();
       }
+
+      checkVisibility();
+      window.addEventListener("scroll", checkVisibility);
     }
 
     function vimeoPlayerPlay() {
