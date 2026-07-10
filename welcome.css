@@ -415,50 +415,41 @@
   }
 
 /* ==========================================================================
-   SELECT FIELDS - SAFARI HARD RESET
+   SELECT FIELDS - SAFARI FINAL FIX
 ========================================================================== */
 
 /*
- * Le wrapper reprend la même hauteur que les autres champs du formulaire.
+ * Le wrapper sert uniquement au positionnement de la flèche.
+ * Aucune hauteur, bordure ou valeur de radius n'est imposée ici.
  */
 .form--guest .field--wrapper {
-  position: relative !important;
-  width: 100% !important;
-  height: 4.75rem !important;
-  min-height: 4.75rem !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  border-radius: 0 !important;
-
+  position: relative;
+  width: 100%;
   background: transparent !important;
   background-color: transparent !important;
-  background-image: none !important;
 }
 
 /* ==========================================================================
    WEBFLOW SELECT
 ========================================================================== */
 
-.form--guest select.text--field.w-select,
+/*
+ * On ne redéfinit volontairement ni height, ni min-height,
+ * ni border, ni border-radius afin de conserver exactement
+ * les valeurs déjà définies par la classe .text--field.
+ */
 .form--guest .field--wrapper > select.text--field.w-select {
-  display: block !important;
-
   width: 100% !important;
-  height: 4.75rem !important;
-  min-height: 4.75rem !important;
 
-  margin: 0 !important;
-  padding: 0 3.5rem 0 1.25rem !important;
+  padding-left: 1.25rem !important;
+  padding-right: 3.5rem !important;
 
-  border-radius: 0 !important;
-  -webkit-border-radius: 0 !important;
-
-  background: transparent !important;
-  background-color: transparent !important;
+  background: rgba(0, 0, 0, 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
   background-image: none !important;
   background-repeat: no-repeat !important;
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
 
   color: inherit !important;
 
@@ -467,7 +458,6 @@
 
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
-
   outline: none !important;
 }
 
@@ -475,21 +465,15 @@
    SELECT STATES
 ========================================================================== */
 
-.form--guest select.text--field.w-select:hover,
-.form--guest select.text--field.w-select:focus,
-.form--guest select.text--field.w-select:focus-visible,
-.form--guest select.text--field.w-select:active,
-.form--guest select.text--field.w-select:required,
-.form--guest select.text--field.w-select:invalid,
-.form--guest select.text--field.w-select:valid {
-  height: 4.75rem !important;
-  min-height: 4.75rem !important;
-
-  border-radius: 0 !important;
-  -webkit-border-radius: 0 !important;
-
-  background: transparent !important;
-  background-color: transparent !important;
+.form--guest .field--wrapper > select.text--field.w-select:hover,
+.form--guest .field--wrapper > select.text--field.w-select:focus,
+.form--guest .field--wrapper > select.text--field.w-select:focus-visible,
+.form--guest .field--wrapper > select.text--field.w-select:active,
+.form--guest .field--wrapper > select.text--field.w-select:required,
+.form--guest .field--wrapper > select.text--field.w-select:invalid,
+.form--guest .field--wrapper > select.text--field.w-select:valid {
+  background: rgba(0, 0, 0, 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
   background-image: none !important;
 
   -webkit-appearance: none !important;
@@ -497,7 +481,6 @@
 
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
-
   outline: none !important;
 }
 
@@ -509,20 +492,17 @@
   position: absolute !important;
   top: 50% !important;
   right: 1.25rem !important;
-  z-index: 5 !important;
+  z-index: 2 !important;
 
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 
   width: 0.75rem !important;
-  height: 0.5rem !important;
+  height: auto !important;
 
-  margin: 0 !important;
   padding: 0 !important;
-
-  border: 0 !important;
-  border-radius: 0 !important;
+  margin: 0 !important;
 
   background: transparent !important;
   background-color: transparent !important;
@@ -534,12 +514,11 @@
 
 .form--guest .field--wrapper .select--arrow {
   display: block !important;
-
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
 
-  margin: 0 !important;
   padding: 0 !important;
+  margin: 0 !important;
 
   background: transparent !important;
   background-color: transparent !important;
@@ -554,19 +533,13 @@
   .form--guest .field--wrapper,
   .form--guest .field--wrapper .select--field-arrow,
   .form--guest .field--wrapper .select--arrow,
-  .form--guest select.text--field.w-select {
-    background: transparent !important;
-    background-color: transparent !important;
+  .form--guest .field--wrapper > select.text--field.w-select {
+    background: rgba(0, 0, 0, 0) !important;
+    background-color: rgba(0, 0, 0, 0) !important;
     background-image: none !important;
   }
 
-  .form--guest select.text--field.w-select {
-    height: 4.75rem !important;
-    min-height: 4.75rem !important;
-
-    border-radius: 0 !important;
-    -webkit-border-radius: 0 !important;
-
+  .form--guest .field--wrapper > select.text--field.w-select {
     -webkit-appearance: none !important;
     appearance: none !important;
 
@@ -574,7 +547,9 @@
     -webkit-box-shadow: none !important;
   }
 
-  .form--guest select.text--field.w-select::-webkit-list-button {
+  .form--guest
+    .field--wrapper
+    > select.text--field.w-select::-webkit-list-button {
     display: none !important;
     width: 0 !important;
     opacity: 0 !important;
