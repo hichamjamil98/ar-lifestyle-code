@@ -413,3 +413,33 @@
       height: 2.5rem !important;
     }
   }
+  /* ==========================================================================
+   SELECT - SAFARI FIX
+========================================================================== */
+
+select,
+.w-select {
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+
+  -webkit-background-clip: padding-box;
+}
+
+/* Safari */
+select::-ms-expand {
+  display: none;
+}
+
+@supports (-webkit-touch-callout: none) {
+  select,
+  .w-select {
+    background: transparent !important;
+    background-color: transparent !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
