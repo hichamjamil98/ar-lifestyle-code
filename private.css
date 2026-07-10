@@ -1,0 +1,249 @@
+
+  /* ==========================================================================
+   EXPERIENCES FILTERS
+========================================================================== */
+
+.filter--wrapper {
+  position: relative;
+  z-index: 20;
+}
+
+
+/* ==========================================================================
+   FILTER BUTTONS
+========================================================================== */
+
+.filter--btn {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background-color 0.4s cubic-bezier(.22, 1, .36, 1),
+    color 0.4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.filter--btn:not(.is--reset) {
+  isolation: isolate;
+}
+
+/* Background lorsqu'un dropdown est ouvert */
+.filter--btn.is--open {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Background lorsqu'un filtre est sélectionné */
+.filter--btn.is--active {
+  background-color: #1d1d1d;
+  color: #fdfdfd;
+}
+
+/* Reset actif uniquement lorsqu'il y a un filtre */
+.filter--btn.is--reset {
+  transition:
+    opacity 0.35s ease,
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.filter--btn.is--reset:not(.is--available) {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.filter--btn.is--reset.is--available {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+/* ==========================================================================
+   FILTER ARROW
+========================================================================== */
+
+.filter--btn .arrow--8 {
+  transition: transform 0.45s cubic-bezier(.22, 1, .36, 1);
+  transform-origin: center;
+}
+
+.filter--btn.is--open .arrow--8 {
+  transform: rotate(180deg);
+}
+
+
+/* ==========================================================================
+   FILTER DROPDOWN
+========================================================================== */
+
+.filter--drop {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 30;
+
+  min-width: 100%;
+  overflow: hidden;
+
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+
+  transform: translateY(-0.5rem);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(.22, 1, .36, 1),
+    visibility 0s linear 0.4s;
+}
+
+.filter--btn.is--open .filter--drop {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+
+  transform: translateY(0);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(.22, 1, .36, 1),
+    visibility 0s linear 0s;
+}
+
+
+/* ==========================================================================
+   FILTER LINKS
+========================================================================== */
+
+.filter--link {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  padding: 0.75rem 1rem;
+
+  background-color: #fdfdfd;
+  color: #1d1d1d;
+
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    padding-left 0.4s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filter--link:hover {
+    padding-left: 1.25rem;
+    background-color: #ecebe7;
+  }
+}
+
+/* Option actuellement sélectionnée */
+.filter--link.is--active {
+  background-color: #1d1d1d;
+  color: #fdfdfd;
+}
+
+/* Petit indicateur actif */
+.filter--link::before {
+  content: "";
+  width: 0;
+  height: 0.375rem;
+
+  margin-right: 0;
+
+  border-radius: 50%;
+  background-color: currentColor;
+
+  opacity: 0;
+
+  transition:
+    width 0.35s cubic-bezier(.22, 1, .36, 1),
+    margin-right 0.35s cubic-bezier(.22, 1, .36, 1),
+    opacity 0.25s ease;
+}
+
+.filter--link.is--active::before {
+  width: 0.375rem;
+  margin-right: 0.5rem;
+  opacity: 1;
+}
+
+
+/* ==========================================================================
+   FILTERED ITEMS
+========================================================================== */
+
+.experiences--list > .w-dyn-item {
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(.22, 1, .36, 1);
+}
+
+.experiences--list > .w-dyn-item.is--filtering-out {
+  opacity: 0;
+  transform: translateY(1rem);
+  pointer-events: none;
+}
+
+.experiences--list > .w-dyn-item.is--filtered-out {
+  display: none !important;
+}
+
+
+/* ==========================================================================
+   EMPTY RESULTS
+========================================================================== */
+
+.empty--results {
+  display: none;
+
+  width: 100%;
+  padding: 4rem 1rem;
+
+  text-align: center;
+  opacity: 0;
+  transform: translateY(1rem);
+
+  transition:
+    opacity 0.4s ease,
+    transform 0.5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.empty--results.is--visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty--results.is--animated {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ==========================================================================
+   FILTER CMS VALUES
+========================================================================== */
+
+.filter--parent {
+  display: none !important;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+========================================================================== */
+
+@media screen and (max-width: 767px) {
+  .filter--drop {
+    min-width: max-content;
+  }
+
+  .filter--link {
+    padding: 0.875rem 1rem;
+  }
+}
