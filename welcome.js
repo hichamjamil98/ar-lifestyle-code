@@ -1,13 +1,15 @@
 
 /* ==========================================================================
    BOOKING PAGE
-   - Phone fields: country detection + formatting
-   - Date fields: paired datepicker logic
+   - Phone fields
+   - Date pickers
+   - Safari custom select fix
 ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
   initializePhoneFields();
   initializeDatePickers();
+  initializeCustomSelects();
 });
 
 /* ==========================================================================
@@ -37,7 +39,7 @@ function initializePhoneFields() {
     })
       .then(function (response) {
         if (!response.ok) {
-          throw new Error("Country lookup request failed");
+          throw new Error("Country lookup failed");
         }
 
         return response.json();
@@ -107,7 +109,7 @@ function initializePhoneFields() {
     input._intlTelInputInstance = iti;
 
     /* ----------------------------------------------------------------------
-       PRESERVE VALIDATED FIELD SPACING
+       PRESERVE PHONE FIELD SPACING
     ---------------------------------------------------------------------- */
 
     function preserveFieldSpacing() {
@@ -117,15 +119,11 @@ function initializePhoneFields() {
         "important"
       );
 
-      const wrapper =
-        input.closest(".iti");
-
+      const wrapper = input.closest(".iti");
       if (!wrapper) return;
 
       const selectedCountry =
-        wrapper.querySelector(
-          ".iti__selected-country"
-        );
+        wrapper.querySelector(".iti__selected-country");
 
       const selectedCountryPrimary =
         wrapper.querySelector(
@@ -152,15 +150,8 @@ function initializePhoneFields() {
     preserveFieldSpacing();
     requestAnimationFrame(preserveFieldSpacing);
 
-    setTimeout(
-      preserveFieldSpacing,
-      100
-    );
-
-    setTimeout(
-      preserveFieldSpacing,
-      500
-    );
+    setTimeout(preserveFieldSpacing, 100);
+    setTimeout(preserveFieldSpacing, 500);
 
     input.addEventListener(
       "countrychange",
@@ -179,9 +170,7 @@ function initializePhoneFields() {
         !selectedCountry ||
         !selectedCountry.iso2
       ) {
-        iti.setCountry(
-          countryCode || "ma"
-        );
+        iti.setCountry(countryCode || "ma");
       }
 
       preserveFieldSpacing();
@@ -193,14 +182,11 @@ function initializePhoneFields() {
   ------------------------------------------------------------------------ */
 
   function initializeAllPhoneInputs(root) {
-    const context =
-      root || document;
+    const context = root || document;
 
     if (
       context.matches &&
-      context.matches(
-        ".text--field.is--phone"
-      )
+      context.matches(".text--field.is--phone")
     ) {
       initializePhoneInput(context);
     }
@@ -209,31 +195,26 @@ function initializePhoneFields() {
       typeof context.querySelectorAll === "function"
     ) {
       context
-        .querySelectorAll(
-          ".text--field.is--phone"
-        )
-        .forEach(
-          initializePhoneInput
-        );
+        .querySelectorAll(".text--field.is--phone")
+        .forEach(initializePhoneInput);
     }
   }
 
   initializeAllPhoneInputs(document);
 
   /* ------------------------------------------------------------------------
-     WATCH DYNAMICALLY ADDED GUEST FIELDS
+     WATCH DYNAMICALLY ADDED PHONE INPUTS
   ------------------------------------------------------------------------ */
 
-  const observer =
-    new MutationObserver(function (mutations) {
-      mutations.forEach(function (mutation) {
-        mutation.addedNodes.forEach(function (node) {
-          if (!(node instanceof HTMLElement)) return;
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (!(node instanceof HTMLElement)) return;
 
-          initializeAllPhoneInputs(node);
-        });
+        initializeAllPhoneInputs(node);
       });
     });
+  });
 
   observer.observe(document.body, {
     childList: true,
@@ -252,9 +233,7 @@ function initializeDatePickers() {
   }
 
   const dateInputs = Array.from(
-    document.querySelectorAll(
-      ".text--field.is--date"
-    )
+    document.querySelectorAll(".text--field.is--date")
   );
 
   if (!dateInputs.length) return;
@@ -274,75 +253,72 @@ function initializeDatePickers() {
 
     input.dataset.datepickerInitialized = "true";
 
-    const picker =
-      window.flatpickr(input, {
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "F j, Y",
+    const picker = window.flatpickr(input, {
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "F j, Y",
 
-        allowInput: false,
-        clickOpens: true,
-        disableMobile: true,
-        minDate: "today",
-        monthSelectorType: "static",
+      allowInput: false,
+      clickOpens: true,
+      disableMobile: true,
+      minDate: "today",
+      monthSelectorType: "static",
 
-        locale: {
-          firstDayOfWeek: 1
-        },
+      locale: {
+        firstDayOfWeek: 1
+      },
 
-        onReady: function (
-          selectedDates,
-          dateStr,
-          instance
-        ) {
-          const visibleInput =
-            instance.altInput;
+      onReady: function (
+        selectedDates,
+        dateStr,
+        instance
+      ) {
+        const visibleInput = instance.altInput;
+        if (!visibleInput) return;
 
-          if (!visibleInput) return;
+        visibleInput.className = input.className;
 
-          visibleInput.className =
-            input.className;
+        visibleInput.classList.add(
+          "flatpickr-input"
+        );
 
-          visibleInput.classList.add(
-            "flatpickr-input"
-          );
+        visibleInput.placeholder =
+          input.getAttribute("placeholder") ||
+          "Select a date";
 
-          visibleInput.placeholder =
-            input.getAttribute("placeholder") ||
-            "Select a date";
+        visibleInput.style.setProperty(
+          "padding-left",
+          "1.25rem",
+          "important"
+        );
 
-          visibleInput.style.setProperty(
-            "padding-left",
-            "1.25rem",
-            "important"
-          );
+        visibleInput.style.setProperty(
+          "padding-right",
+          "1.25rem",
+          "important"
+        );
 
-          visibleInput.style.setProperty(
-            "padding-right",
-            "1.25rem",
-            "important"
-          );
+        visibleInput.style.setProperty(
+          "background",
+          "transparent",
+          "important"
+        );
 
-          visibleInput.style.setProperty(
-            "background",
-            "transparent",
-            "important"
-          );
-        }
-      });
+        visibleInput.style.setProperty(
+          "background-color",
+          "transparent",
+          "important"
+        );
+      }
+    });
 
-    input._flatpickrInstance =
-      picker;
-
+    input._flatpickrInstance = picker;
     datePickers.push(picker);
   });
 
   /* ------------------------------------------------------------------------
      CONNECT DATE INPUTS BY PAIRS
-
-     Pair 1: input 1 + input 2
-     Pair 2: input 3 + input 4
-     Pair 3: input 5 + input 6
+     1 + 2, 3 + 4, 5 + 6, etc.
   ------------------------------------------------------------------------ */
 
   for (
@@ -350,39 +326,25 @@ function initializeDatePickers() {
     index < datePickers.length;
     index += 2
   ) {
-    const firstPicker =
-      datePickers[index];
+    const firstPicker = datePickers[index];
+    const secondPicker = datePickers[index + 1];
 
-    const secondPicker =
-      datePickers[index + 1];
-
-    if (
-      !firstPicker ||
-      !secondPicker
-    ) {
-      continue;
-    }
+    if (!firstPicker || !secondPicker) continue;
 
     firstPicker.config.onChange.push(
       function (selectedDates) {
-        const firstDate =
-          selectedDates[0];
+        const firstDate = selectedDates[0];
 
         if (!firstDate) {
-          secondPicker.set(
-            "minDate",
-            "today"
-          );
-
+          secondPicker.set("minDate", "today");
           return;
         }
 
         /*
          * La deuxième date doit être strictement
-         * après la première date.
+         * après la première.
          */
-        const nextDay =
-          new Date(firstDate);
+        const nextDay = new Date(firstDate);
 
         nextDay.setDate(
           nextDay.getDate() + 1
@@ -406,7 +368,7 @@ function initializeDatePickers() {
     );
 
     /* ----------------------------------------------------------------------
-       INITIAL VALUE
+       INITIAL VALUES
     ---------------------------------------------------------------------- */
 
     const initialFirstDate =
@@ -426,4 +388,133 @@ function initializeDatePickers() {
       );
     }
   }
+}
+
+/* ==========================================================================
+   CUSTOM SELECTS - SAFARI FIX
+========================================================================== */
+
+function initializeCustomSelects() {
+  function fixSelects(root) {
+    const context = root || document;
+
+    const selector =
+      ".form--guest .field--wrapper select.text--field";
+
+    const selects = [];
+
+    if (
+      context.matches &&
+      context.matches(selector)
+    ) {
+      selects.push(context);
+    }
+
+    if (
+      typeof context.querySelectorAll === "function"
+    ) {
+      context
+        .querySelectorAll(selector)
+        .forEach(function (select) {
+          selects.push(select);
+        });
+    }
+
+    selects.forEach(function (select) {
+      if (
+        select.dataset.safariSelectReady === "true"
+      ) {
+        return;
+      }
+
+      select.dataset.safariSelectReady = "true";
+
+      /*
+       * Retire la classe Webflow spécifique au select.
+       * La classe .text--field reste présente.
+       */
+      select.classList.remove("w-select");
+
+      select.style.setProperty(
+        "-webkit-appearance",
+        "none",
+        "important"
+      );
+
+      select.style.setProperty(
+        "appearance",
+        "none",
+        "important"
+      );
+
+      select.style.setProperty(
+        "background",
+        "transparent",
+        "important"
+      );
+
+      select.style.setProperty(
+        "background-color",
+        "transparent",
+        "important"
+      );
+
+      select.style.setProperty(
+        "background-image",
+        "none",
+        "important"
+      );
+
+      select.style.setProperty(
+        "background-repeat",
+        "no-repeat",
+        "important"
+      );
+
+      select.style.setProperty(
+        "box-shadow",
+        "none",
+        "important"
+      );
+
+      select.style.setProperty(
+        "-webkit-box-shadow",
+        "none",
+        "important"
+      );
+
+      select.style.setProperty(
+        "padding-left",
+        "1.25rem",
+        "important"
+      );
+
+      select.style.setProperty(
+        "padding-right",
+        "3.5rem",
+        "important"
+      );
+    });
+  }
+
+  fixSelects(document);
+
+  /* ------------------------------------------------------------------------
+     SUPPORT DYNAMICALLY ADDED GUESTS
+  ------------------------------------------------------------------------ */
+
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (!(node instanceof HTMLElement)) return;
+
+        fixSelects(node);
+      });
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 }
