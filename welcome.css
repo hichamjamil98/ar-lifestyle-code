@@ -498,41 +498,93 @@
   }
   
   /* ==========================================================================
-     SAFARI FIXES
+   SELECT FIELDS - SAFARI FIX
+========================================================================== */
+
+.field--wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Select Webflow */
+  .field--wrapper > select.text--field.w-select {
+    width: 100% !important;
+  
+    /* Conserve les dimensions définies par .text--field */
+    height: auto !important;
+    min-height: unset !important;
+  
+    padding-left: 1.25rem !important;
+    padding-right: 3.5rem !important;
+  
+    /* Ne pas écraser la bordure ni le radius Webflow */
+    border-color: inherit !important;
+  
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+  
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  /* Focus */
+  .field--wrapper > select.text--field.w-select:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* ==========================================================================
+     CUSTOM ARROW
+  ========================================================================== */
+  
+  .field--wrapper .select--field-arrow {
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    z-index: 2;
+  
+    width: 0.75rem;
+    height: auto;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    transform: translateY(-50%);
+    pointer-events: none;
+  
+    background: transparent !important;
+  }
+  
+  .field--wrapper .select--arrow {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* ==========================================================================
+     SAFARI
   ========================================================================== */
   
   @supports (-webkit-touch-callout: none) {
-  
-    .field--wrapper,
-    .field--wrapper::before,
-    .field--wrapper::after,
-    .field--wrapper .select--field-arrow,
     .field--wrapper > select.text--field.w-select {
       background: transparent !important;
       background-color: transparent !important;
       background-image: none !important;
-    }
-  
-    .field--wrapper > select.text--field.w-select {
-      width: 100% !important;
-      height: 100% !important;
-  
-      border: inherit !important;
-      border-radius: inherit !important;
   
       -webkit-appearance: none !important;
       appearance: none !important;
-  
-      box-shadow: none !important;
-    }
-  
-    /* Cache complètement les contrôles natifs Safari */
-    .field--wrapper > select.text--field.w-select::-webkit-list-button,
-    .field--wrapper > select.text--field.w-select::-webkit-calendar-picker-indicator,
-    .field--wrapper > select.text--field.w-select::-webkit-inner-spin-button,
-    .field--wrapper > select.text--field.w-select::-webkit-contacts-auto-fill-button {
-      display: none !important;
-      opacity: 0 !important;
-      -webkit-appearance: none !important;
     }
   }
