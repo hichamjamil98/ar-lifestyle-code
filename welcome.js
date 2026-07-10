@@ -542,12 +542,9 @@ function initializeCustomSelects() {
 
 
 
-
-
-
 document.addEventListener("DOMContentLoaded", function () {
   /* ==========================================================================
-     GUEST TABS — ELEMENTS
+     ELEMENTS
   ========================================================================== */
 
   const guestTabs =
@@ -603,25 +600,22 @@ document.addEventListener("DOMContentLoaded", function () {
   ========================================================================== */
 
   /*
-   * null = nombre d’invités illimité.
-   * Exemple : const MAX_GUESTS = 10;
+   * null = nombre illimité.
+   * Exemple : 10 pour limiter à 10 Guests.
    */
   const MAX_GUESTS = null;
 
   /*
-   * Guest 1 et Guest 2 sont accessibles au départ.
-   * Guest 3 devient accessible après ouverture de Guest 2.
+   * Guest 2 accessible au départ.
+   * Guest 3 débloqué après ouverture de Guest 2.
    */
   let highestUnlockedGuest = 2;
 
-  /*
-   * Instances intl-tel-input.
-   */
   const phoneInstances =
     new Map();
 
   /*
-   * Template propre utilisé pour tous les clones.
+   * Le template est nettoyé sans modifier Guest 1.
    */
   const guestTemplate =
     createCleanGuestTemplate(
@@ -639,8 +633,8 @@ document.addEventListener("DOMContentLoaded", function () {
   updateTabOpacity();
 
   /*
-   * Attend que les autres scripts de la page soient terminés
-   * avant d’initialiser les plugins du premier Guest.
+   * On attend les scripts globaux :
+   * intl-tel-input et Flatpickr de Guest 1.
    */
   window.requestAnimationFrame(
     function () {
@@ -657,9 +651,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   );
 
-  /*
-   * Sécurité contre les styles inline GSAP.
-   */
   window.setTimeout(
     updateTabOpacity,
     300
@@ -712,17 +703,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      /*
-       * Tab Guest normal.
-       */
       const guestNumber =
         getGuestNumber(clickedTab);
 
       if (!guestNumber) return;
 
       /*
-       * Empêche l’accès direct à Guest 3
-       * avant l’ouverture de Guest 2.
+       * Interdit Guest 3 avant Guest 2.
        */
       if (
         guestNumber >
@@ -740,8 +727,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       /*
-       * L’ouverture du dernier Guest disponible
-       * débloque le suivant s’il existe déjà.
+       * Guest 2 débloque Guest 3.
        */
       unlockGuest(
         guestNumber + 1
@@ -769,10 +755,6 @@ document.addEventListener("DOMContentLoaded", function () {
           guestNumber
         );
 
-        /*
-         * Guest 1 et Guest 2 disponibles.
-         * Guest 3 bloqué au départ.
-         */
         setTabLocked(
           tab,
           guestNumber > 2
@@ -782,7 +764,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /*
      * Conserve uniquement le pane Guest 1.
-     * Les autres panes sont créés au premier clic.
      */
     Array.from(
       tabsContent.querySelectorAll(
@@ -797,7 +778,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     /*
-     * Le bouton + n’est plus un tab natif Webflow.
+     * Le + n’est plus traité comme un tab Webflow.
      */
     addButton.removeAttribute(
       "data-w-tab"
@@ -865,9 +846,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return pane;
     }
 
-    /*
-     * Clone exact du template propre.
-     */
     const clonedGuestForm =
       guestTemplate.cloneNode(true);
 
@@ -926,7 +904,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     ADD GUEST 4, 5, 6...
+     ADD GUEST
   ========================================================================== */
 
   function addNextGuest() {
@@ -1052,9 +1030,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /*
-     * Tabs.
-     */
     getGuestTabs().forEach(
       function (tab) {
         const isCurrent =
@@ -1078,9 +1053,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     );
 
-    /*
-     * Panes.
-     */
     getGuestPanes().forEach(
       function (pane) {
         const isCurrent =
@@ -1113,9 +1085,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateTabOpacity();
 
-    /*
-     * Recalcule les dimensions des plugins dans le tab visible.
-     */
     window.requestAnimationFrame(
       function () {
         window.dispatchEvent(
@@ -1126,7 +1095,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     TAB OPACITY
+     OPACITY
   ========================================================================== */
 
   function updateTabOpacity() {
@@ -1203,9 +1172,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateAddButtonState() {
-    /*
-     * Le + est disponible après la création de Guest 3.
-     */
     const guestThreeExists =
       Boolean(
         getGuestPane(3)
@@ -1228,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     GRID — REMOVE OLD GENERATED OVERRIDES
+     GRID CLEANUP
   ========================================================================== */
 
   function clearGeneratedGridStyles(
@@ -1284,7 +1250,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     FIELD IDS / NAMES
+     UNIQUE IDS / NAMES
   ========================================================================== */
 
   function suffixGuestFields(
@@ -1297,9 +1263,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const idMap =
       new Map();
 
-    /*
-     * IDs.
-     */
     container
       .querySelectorAll("[id]")
       .forEach(
@@ -1310,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!originalId) return;
 
           /*
-           * Conserve les IDs Webflow de layout.
+           * Conserve les IDs Webflow.
            */
           if (
             originalId.startsWith(
@@ -1321,7 +1284,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           /*
-           * Supprime les IDs techniques de plugins.
+           * Supprime les IDs techniques.
            */
           if (
             originalId.startsWith(
@@ -1354,9 +1317,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
 
-    /*
-     * Names et data-name.
-     */
     container
       .querySelectorAll(
         "input[name], select[name], textarea[name]"
@@ -1394,9 +1354,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
 
-    /*
-     * Labels.
-     */
     container
       .querySelectorAll(
         "label[for]"
@@ -1422,9 +1379,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
 
-    /*
-     * Références d’IDs.
-     */
     [
       "aria-controls",
       "aria-labelledby",
@@ -1447,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
               if (!value) return;
 
-              const updated =
+              const updatedValue =
                 value
                   .split(/\s+/)
                   .map(
@@ -1462,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
               element.setAttribute(
                 attribute,
-                updated
+                updatedValue
               );
             }
           );
@@ -1533,9 +1487,10 @@ document.addEventListener("DOMContentLoaded", function () {
       template
     );
 
-    /*
-     * Nettoyage intl-tel-input.
-     */
+    /* --------------------------------------------------------------------------
+       PHONE TEMPLATE CLEANUP
+    -------------------------------------------------------------------------- */
+
     template
       .querySelectorAll(".iti")
       .forEach(
@@ -1554,7 +1509,7 @@ document.addEventListener("DOMContentLoaded", function () {
             phoneInput.cloneNode(true);
 
           /*
-           * Le wrapper peut porter une classe w-node-*.
+           * Transfère seulement les classes Webflow.
            */
           Array.from(
             itiWrapper.classList
@@ -1603,25 +1558,28 @@ document.addEventListener("DOMContentLoaded", function () {
             "iti__tel-input"
           );
 
-          clearGeneratedGridStyles(
-            cleanPhoneInput
-          );
-
           itiWrapper.replaceWith(
             cleanPhoneInput
           );
         }
       );
 
+    /* --------------------------------------------------------------------------
+       DATE TEMPLATE CLEANUP
+    -------------------------------------------------------------------------- */
+
     /*
-     * Supprime les anciens altInputs Flatpickr.
+     * Supprime uniquement les champs visibles alternatifs
+     * générés par Flatpickr.
+     *
+     * Les vrais champs Webflow possèdent un name.
      */
     template
       .querySelectorAll(
         [
           'input[data-flatpickr-alt="true"]',
           "input.is--date:not([name])",
-          "input.form-control:not([name])"
+          "input.flatpickr-input:not([name])"
         ].join(",")
       )
       .forEach(
@@ -1631,7 +1589,8 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
     /*
-     * Nettoie les vrais champs date.
+     * Nettoie les vrais champs destinés aux clones.
+     * Guest 1 n’est pas affecté.
      */
     template
       .querySelectorAll(
@@ -1664,7 +1623,19 @@ document.addEventListener("DOMContentLoaded", function () {
           );
 
           input.removeAttribute(
+            "data-guest-date-link-ready"
+          );
+
+          input.removeAttribute(
             "data-flatpickr-alt"
+          );
+
+          input.removeAttribute(
+            "aria-hidden"
+          );
+
+          input.removeAttribute(
+            "tabindex"
           );
 
           input.removeAttribute(
@@ -1682,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
     /*
-     * Supprime les hidden fields téléphone.
+     * Hidden fields téléphone.
      */
     template
       .querySelectorAll(
@@ -1698,7 +1669,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
     /*
-     * Supprime les états d’erreur ou succès.
+     * États de formulaire.
      */
     template
       .querySelectorAll(
@@ -1720,7 +1691,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     RESET CLONED FIELDS
+     RESET FIELDS
   ========================================================================== */
 
   function resetGuestFields(
@@ -1795,12 +1766,13 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     initializeGuestDates(
-      container
+      container,
+      guestNumber
     );
   }
 
   /* ==========================================================================
-     PHONE INITIALIZATION
+     PHONE
   ========================================================================== */
 
   function initializeGuestPhones(
@@ -1817,9 +1789,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let instance =
           null;
 
-        /*
-         * Réutilise une instance existante pour Guest 1.
-         */
         if (
           window.intlTelInput &&
           typeof window
@@ -1834,9 +1803,6 @@ document.addEventListener("DOMContentLoaded", function () {
               );
         }
 
-        /*
-         * Crée l’instance si nécessaire.
-         */
         if (!instance) {
           if (
             phoneInput.dataset
@@ -2020,7 +1986,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
     }
 
-    function syncPhone() {
+    function synchronizePhone() {
       const country =
         instance
           .getSelectedCountryData();
@@ -2045,29 +2011,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
       phoneInput.addEventListener(
         "input",
-        syncPhone
+        synchronizePhone
       );
 
       phoneInput.addEventListener(
         "change",
-        syncPhone
+        synchronizePhone
       );
 
       phoneInput.addEventListener(
         "countrychange",
-        syncPhone
+        synchronizePhone
       );
     }
 
-    syncPhone();
+    synchronizePhone();
   }
 
   /* ==========================================================================
-     DATES — INITIALIZATION
+     DATES
   ========================================================================== */
 
   function initializeGuestDates(
-    container
+    container,
+    guestNumber
   ) {
     const arrivalInput =
       findDateField(
@@ -2088,9 +2055,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /*
-     * Flatpickr peut être chargé après DOMContentLoaded.
-     */
     if (
       typeof window.flatpickr !==
       "function"
@@ -2098,7 +2062,8 @@ document.addEventListener("DOMContentLoaded", function () {
       window.setTimeout(
         function () {
           initializeGuestDates(
-            container
+            container,
+            guestNumber
           );
         },
         200
@@ -2107,51 +2072,93 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /*
-     * Évite une seconde initialisation valide.
-     */
-    if (
-      arrivalInput._flatpickr &&
-      departureInput._flatpickr &&
+    /* --------------------------------------------------------------------------
+       GUEST 1 — KEEP EXISTING FLATPICKR
+    -------------------------------------------------------------------------- */
+
+    if (guestNumber === 1) {
+      const arrivalPicker =
+        arrivalInput._flatpickr ||
+        null;
+
+      const departurePicker =
+        departureInput._flatpickr ||
+        null;
+
+      /*
+       * Le script global peut être encore en cours.
+       * On ne détruit rien et on retente.
+       */
+      if (
+        !arrivalPicker ||
+        !departurePicker
+      ) {
+        window.setTimeout(
+          function () {
+            initializeGuestDates(
+              container,
+              1
+            );
+          },
+          250
+        );
+
+        return;
+      }
+
+      connectDatePickers(
+        arrivalInput,
+        departureInput,
+        arrivalPicker,
+        departurePicker
+      );
+
       arrivalInput.dataset
-        .guestDateInitialized ===
-        "true" &&
+        .guestDateInitialized =
+        "true";
+
       departureInput.dataset
-        .guestDateInitialized ===
-        "true"
-    ) {
+        .guestDateInitialized =
+        "true";
+
       return;
     }
 
+    /* --------------------------------------------------------------------------
+       CLONES
+    -------------------------------------------------------------------------- */
+
     /*
-     * Nettoie les anciennes instances et altInputs.
+     * Si déjà initialisés, ne pas recréer.
      */
-    cleanDateField(
-      arrivalInput
-    );
+    if (
+      arrivalInput._flatpickr &&
+      departureInput._flatpickr
+    ) {
+      connectDatePickers(
+        arrivalInput,
+        departureInput,
+        arrivalInput._flatpickr,
+        departureInput._flatpickr
+      );
 
-    cleanDateField(
-      departureInput
-    );
+      return;
+    }
 
-    removeAllDateAltInputs(
+    removeCloneDateArtifacts(
       container
     );
 
-    prepareVisibleDateInput(
+    prepareCloneDateInput(
       arrivalInput
     );
 
-    prepareVisibleDateInput(
+    prepareCloneDateInput(
       departureInput
     );
 
     let departurePicker =
       null;
-
-    /* --------------------------------------------------------------------------
-       ARRIVAL
-    -------------------------------------------------------------------------- */
 
     const arrivalPicker =
       window.flatpickr(
@@ -2160,38 +2167,20 @@ document.addEventListener("DOMContentLoaded", function () {
           dateFormat:
             "Y-m-d",
 
-          altInput:
-            false,
-
           allowInput:
             false,
 
           clickOpens:
             true,
 
-          /*
-           * Force Flatpickr également sur mobile.
-           */
           disableMobile:
             true,
 
-          onReady:
-            function (
-              selectedDates,
-              dateStr,
-              instance
-            ) {
-              prepareVisibleDateInput(
-                instance.input
-              );
-            },
-
-          onOpen:
-            function () {
-              prepareVisibleDateInput(
-                arrivalInput
-              );
-            },
+          /*
+           * Pas de second champ visible sur les clones.
+           */
+          altInput:
+            false,
 
           onChange:
             function (
@@ -2204,9 +2193,7 @@ document.addEventListener("DOMContentLoaded", function () {
               departureInput
                 .setCustomValidity("");
 
-              if (
-                !departurePicker
-              ) {
+              if (!departurePicker) {
                 return;
               }
 
@@ -2219,31 +2206,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
               }
 
-              /*
-               * Departure doit être au minimum
-               * le lendemain d’Arrival.
-               */
-              const minimumDeparture =
+              departurePicker.set(
+                "minDate",
                 addDays(
                   arrivalDate,
                   1
-                );
-
-              departurePicker.set(
-                "minDate",
-                minimumDeparture
+                )
               );
 
-              const selectedDeparture =
+              const currentDeparture =
                 departurePicker
                   .selectedDates[0];
 
-              /*
-               * Efface Departure si elle devient invalide.
-               */
               if (
-                selectedDeparture &&
-                selectedDeparture <=
+                currentDeparture &&
+                currentDeparture <=
                   arrivalDate
               ) {
                 departurePicker.clear();
@@ -2257,19 +2234,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       );
 
-    /* --------------------------------------------------------------------------
-       DEPARTURE
-    -------------------------------------------------------------------------- */
-
     departurePicker =
       window.flatpickr(
         departureInput,
         {
           dateFormat:
             "Y-m-d",
-
-          altInput:
-            false,
 
           allowInput:
             false,
@@ -2280,16 +2250,8 @@ document.addEventListener("DOMContentLoaded", function () {
           disableMobile:
             true,
 
-          onReady:
-            function (
-              selectedDates,
-              dateStr,
-              instance
-            ) {
-              prepareVisibleDateInput(
-                instance.input
-              );
-            },
+          altInput:
+            false,
 
           onOpen:
             function () {
@@ -2333,39 +2295,119 @@ document.addEventListener("DOMContentLoaded", function () {
       .guestDateInitialized =
       "true";
 
-    /*
-     * Ouverture explicite au clic et au focus.
-     */
-    bindDatePickerOpen(
+    connectDatePickers(
       arrivalInput,
-      arrivalPicker
-    );
-
-    bindDatePickerOpen(
       departureInput,
+      arrivalPicker,
       departurePicker
     );
-
-    /*
-     * Si Arrival possède déjà une valeur.
-     */
-    if (
-      arrivalPicker
-        .selectedDates[0]
-    ) {
-      departurePicker.set(
-        "minDate",
-        addDays(
-          arrivalPicker
-            .selectedDates[0],
-          1
-        )
-      );
-    }
   }
 
   /* ==========================================================================
-     DATE FIELD FINDER
+     DATE — CONNECT ARRIVAL / DEPARTURE
+  ========================================================================== */
+
+  function connectDatePickers(
+    arrivalInput,
+    departureInput,
+    arrivalPicker,
+    departurePicker
+  ) {
+    if (
+      !arrivalInput ||
+      !departureInput ||
+      !arrivalPicker ||
+      !departurePicker
+    ) {
+      return;
+    }
+
+    function updateDepartureMinimum() {
+      const arrivalDate =
+        arrivalPicker
+          .selectedDates[0];
+
+      if (!arrivalDate) {
+        departurePicker.set(
+          "minDate",
+          null
+        );
+
+        departureInput
+          .setCustomValidity("");
+
+        return;
+      }
+
+      departurePicker.set(
+        "minDate",
+        addDays(
+          arrivalDate,
+          1
+        )
+      );
+
+      const currentDeparture =
+        departurePicker
+          .selectedDates[0];
+
+      if (
+        currentDeparture &&
+        currentDeparture <=
+          arrivalDate
+      ) {
+        departurePicker.clear();
+      }
+
+      validateDateRange(
+        arrivalInput,
+        departureInput
+      );
+    }
+
+    /*
+     * Évite les listeners en double.
+     */
+    if (
+      arrivalInput.dataset
+        .guestDateLinkReady !==
+      "true"
+    ) {
+      arrivalInput.dataset
+        .guestDateLinkReady =
+        "true";
+
+      arrivalInput.addEventListener(
+        "change",
+        updateDepartureMinimum
+      );
+    }
+
+    if (
+      departureInput.dataset
+        .guestDateLinkReady !==
+      "true"
+    ) {
+      departureInput.dataset
+        .guestDateLinkReady =
+        "true";
+
+      departureInput.addEventListener(
+        "change",
+        function () {
+          validateDateRange(
+            arrivalInput,
+            departureInput
+          );
+        }
+      );
+    }
+
+    updateDepartureMinimum();
+  }
+
+  /* ==========================================================================
+     DATE — FIND FIELD
   ========================================================================== */
 
   function findDateField(
@@ -2419,51 +2461,44 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     DATE — CLEAN FIELD
+     DATE — CLEAN CLONE ONLY
   ========================================================================== */
 
-  function cleanDateField(
+  function removeCloneDateArtifacts(
+    container
+  ) {
+    container
+      .querySelectorAll(
+        [
+          'input[data-flatpickr-alt="true"]',
+          "input.is--date:not([name])",
+          "input.flatpickr-input:not([name])"
+        ].join(",")
+      )
+      .forEach(
+        function (input) {
+          input.remove();
+        }
+      );
+  }
+
+  function prepareCloneDateInput(
     input
   ) {
     if (!input) return;
 
     /*
-     * Retire le listener d’ouverture précédent.
+     * Ne détruit aucune instance existante.
+     * Cette fonction est réservée aux clones propres.
      */
-    if (
-      input._guestDateClickHandler
-    ) {
-      input.removeEventListener(
-        "click",
-        input._guestDateClickHandler
-      );
-
-      input.removeEventListener(
-        "focus",
-        input._guestDateClickHandler
-      );
-
-      input.removeEventListener(
-        "pointerdown",
-        input._guestDateClickHandler
-      );
-
-      input._guestDateClickHandler =
-        null;
-    }
-
-    /*
-     * Détruit l’ancienne instance.
-     */
-    if (input._flatpickr) {
-      input._flatpickr.destroy();
-    }
-
     input._flatpickr =
       null;
 
     input.type =
       "text";
+
+    input.value =
+      "";
 
     input.readOnly =
       false;
@@ -2478,6 +2513,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     input.removeAttribute(
       "data-guest-date-initialized"
+    );
+
+    input.removeAttribute(
+      "data-guest-date-link-ready"
     );
 
     input.removeAttribute(
@@ -2498,152 +2537,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     DATE — REMOVE OLD ALT INPUTS
-  ========================================================================== */
-
-  function removeAllDateAltInputs(
-    container
-  ) {
-    container
-      .querySelectorAll(
-        [
-          'input[data-flatpickr-alt="true"]',
-          "input.is--date:not([name])",
-          "input.form-control:not([name])"
-        ].join(",")
-      )
-      .forEach(
-        function (input) {
-          input.remove();
-        }
-      );
-  }
-
-  /* ==========================================================================
-     DATE — VISIBLE INPUT
-  ========================================================================== */
-
-  function prepareVisibleDateInput(
-    input
-  ) {
-    if (!input) return;
-
-    input.type =
-      "text";
-
-    /*
-     * Empêche la saisie manuelle,
-     * mais le champ reste cliquable.
-     */
-    input.readOnly =
-      true;
-
-    input.setAttribute(
-      "readonly",
-      "readonly"
-    );
-
-    input.style.removeProperty(
-      "display"
-    );
-
-    input.style.removeProperty(
-      "visibility"
-    );
-
-    input.style.removeProperty(
-      "opacity"
-    );
-
-    input.style.removeProperty(
-      "pointer-events"
-    );
-
-    input.style.setProperty(
-      "cursor",
-      "pointer"
-    );
-
-    input.style.setProperty(
-      "pointer-events",
-      "auto"
-    );
-  }
-
-  /* ==========================================================================
-     DATE — FORCE PICKER OPEN
-  ========================================================================== */
-
-  function bindDatePickerOpen(
-    input,
-    picker
-  ) {
-    if (
-      !input ||
-      !picker
-    ) {
-      return;
-    }
-
-    /*
-     * Supprime un ancien listener éventuel.
-     */
-    if (
-      input._guestDateClickHandler
-    ) {
-      input.removeEventListener(
-        "click",
-        input._guestDateClickHandler
-      );
-
-      input.removeEventListener(
-        "focus",
-        input._guestDateClickHandler
-      );
-
-      input.removeEventListener(
-        "pointerdown",
-        input._guestDateClickHandler
-      );
-    }
-
-    const openPicker =
-      function (event) {
-        /*
-         * Ne bloque pas le comportement interne Flatpickr.
-         */
-        event.stopPropagation();
-
-        window.requestAnimationFrame(
-          function () {
-            if (!picker.isOpen) {
-              picker.open();
-            }
-          }
-        );
-      };
-
-    input._guestDateClickHandler =
-      openPicker;
-
-    input.addEventListener(
-      "click",
-      openPicker
-    );
-
-    input.addEventListener(
-      "focus",
-      openPicker
-    );
-
-    input.addEventListener(
-      "pointerdown",
-      openPicker
-    );
-  }
-
-  /* ==========================================================================
-     DATE — ADD DAYS
+     DATE — HELPERS
   ========================================================================== */
 
   function addDays(
@@ -2668,10 +2562,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return result;
   }
 
-  /* ==========================================================================
-     DATE — RANGE VALIDATION
-  ========================================================================== */
-
   function validateDateRange(
     arrivalInput,
     departureInput
@@ -2679,9 +2569,6 @@ document.addEventListener("DOMContentLoaded", function () {
     departureInput
       .setCustomValidity("");
 
-    /*
-     * Ne contrôle la relation que si les deux dates existent.
-     */
     if (
       !arrivalInput.value ||
       !departureInput.value
@@ -2690,13 +2577,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const arrivalDate =
-      parseDate(
-        arrivalInput.value
+      getDateFromInput(
+        arrivalInput
       );
 
     const departureDate =
-      parseDate(
-        departureInput.value
+      getDateFromInput(
+        departureInput
       );
 
     if (
@@ -2722,6 +2609,108 @@ document.addEventListener("DOMContentLoaded", function () {
       .setCustomValidity("");
 
     return true;
+  }
+
+  function getDateFromInput(
+    input
+  ) {
+    if (
+      input._flatpickr &&
+      input._flatpickr
+        .selectedDates[0]
+    ) {
+      const date =
+        new Date(
+          input._flatpickr
+            .selectedDates[0]
+        );
+
+      date.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      return date;
+    }
+
+    return parseDateValue(
+      input.value
+    );
+  }
+
+  function parseDateValue(
+    value
+  ) {
+    const normalized =
+      String(value || "")
+        .trim();
+
+    /*
+     * YYYY-MM-DD
+     */
+    let match =
+      normalized.match(
+        /^(\d{4})-(\d{2})-(\d{2})$/
+      );
+
+    if (match) {
+      return createSafeDate(
+        Number(match[1]),
+        Number(match[2]),
+        Number(match[3])
+      );
+    }
+
+    /*
+     * DD/MM/YYYY
+     */
+    match =
+      normalized.match(
+        /^(\d{2})\/(\d{2})\/(\d{4})$/
+      );
+
+    if (match) {
+      return createSafeDate(
+        Number(match[3]),
+        Number(match[2]),
+        Number(match[1])
+      );
+    }
+
+    return null;
+  }
+
+  function createSafeDate(
+    year,
+    month,
+    day
+  ) {
+    const date =
+      new Date(
+        year,
+        month - 1,
+        day
+      );
+
+    date.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !==
+        month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return date;
   }
 
   function validateAllDates() {
@@ -2764,43 +2753,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     DATE — PARSE YYYY-MM-DD
-  ========================================================================== */
-
-  function parseDate(
-    value
-  ) {
-    const parts =
-      String(value).split("-");
-
-    if (
-      parts.length !== 3
-    ) {
-      return null;
-    }
-
-    const date =
-      new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
-      );
-
-    date.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    return Number.isNaN(
-      date.getTime()
-    )
-      ? null
-      : date;
-  }
-
-  /* ==========================================================================
      FORM VALIDATION
   ========================================================================== */
 
@@ -2839,9 +2791,6 @@ document.addEventListener("DOMContentLoaded", function () {
     true
   );
 
-  /*
-   * Validation au clic sur Submit.
-   */
   guestFormWrapper
     .querySelectorAll(
       [
@@ -2877,9 +2826,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     );
 
-  /*
-   * Validation finale avant Webflow.
-   */
   guestFormWrapper.addEventListener(
     "submit",
     function (event) {
@@ -2920,14 +2866,10 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           if (
-            field.type ===
-              "hidden" ||
-            field.type ===
-              "submit" ||
-            field.type ===
-              "button" ||
-            field.type ===
-              "reset"
+            field.type === "hidden" ||
+            field.type === "submit" ||
+            field.type === "button" ||
+            field.type === "reset"
           ) {
             return false;
           }
@@ -2961,13 +2903,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.requestAnimationFrame(
       function () {
-        /*
-         * Champ Flatpickr invalide.
-         */
         if (
           field._flatpickr
         ) {
-          field.focus();
+          /*
+           * Ouvre le picker du vrai input
+           * ou de son altInput existant.
+           */
+          if (
+            field._flatpickr.altInput
+          ) {
+            field._flatpickr
+              .altInput
+              .focus();
+          } else {
+            field.focus();
+          }
+
           field._flatpickr.open();
           return;
         }
