@@ -414,32 +414,125 @@
     }
   }
   /* ==========================================================================
-   SELECT - SAFARI FIX
+   SELECT FIELDS - SAFARI RESET
 ========================================================================== */
 
-select,
-.w-select {
-  -webkit-appearance: none;
-  appearance: none;
-
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-
-  -webkit-background-clip: padding-box;
-}
-
-/* Safari */
-select::-ms-expand {
-  display: none;
-}
-
-@supports (-webkit-touch-callout: none) {
-  select,
-  .w-select {
+.field--wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: transparent !important;
+  }
+  
+  .field--wrapper::before,
+  .field--wrapper::after {
+    background: transparent !important;
+  }
+  
+  /* --------------------------------------------------------------------------
+     WEBFLOW SELECT
+  --------------------------------------------------------------------------- */
+  
+  .field--wrapper > select.text--field.w-select {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: inherit !important;
+  
+    padding-top: 0 !important;
+    padding-right: 3.5rem !important;
+    padding-bottom: 0 !important;
+    padding-left: 1.25rem !important;
+  
+    border: inherit !important;
+    border-radius: inherit !important;
+  
     background: transparent !important;
     background-color: transparent !important;
-    -webkit-appearance: none;
-    appearance: none;
+    background-image: none !important;
+  
+    color: inherit !important;
+    font: inherit !important;
+    line-height: inherit !important;
+  
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  
+    box-shadow: none !important;
+    outline: none !important;
   }
-}
+  
+  /* --------------------------------------------------------------------------
+     FOCUS
+  --------------------------------------------------------------------------- */
+  
+  .field--wrapper > select.text--field.w-select:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  
+    border-color: inherit !important;
+    border-radius: inherit !important;
+  
+    box-shadow: none !important;
+  }
+  
+  /* --------------------------------------------------------------------------
+     CUSTOM ARROW
+  --------------------------------------------------------------------------- */
+  
+  .field--wrapper .select--field-arrow {
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    z-index: 2;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    transform: translateY(-50%);
+    pointer-events: none;
+  
+    background: transparent !important;
+  }
+  
+  /* ==========================================================================
+     SAFARI FIXES
+  ========================================================================== */
+  
+  @supports (-webkit-touch-callout: none) {
+  
+    .field--wrapper,
+    .field--wrapper::before,
+    .field--wrapper::after,
+    .field--wrapper .select--field-arrow,
+    .field--wrapper > select.text--field.w-select {
+      background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+  
+    .field--wrapper > select.text--field.w-select {
+      width: 100% !important;
+      height: 100% !important;
+  
+      border: inherit !important;
+      border-radius: inherit !important;
+  
+      -webkit-appearance: none !important;
+      appearance: none !important;
+  
+      box-shadow: none !important;
+    }
+  
+    /* Cache complètement les contrôles natifs Safari */
+    .field--wrapper > select.text--field.w-select::-webkit-list-button,
+    .field--wrapper > select.text--field.w-select::-webkit-calendar-picker-indicator,
+    .field--wrapper > select.text--field.w-select::-webkit-inner-spin-button,
+    .field--wrapper > select.text--field.w-select::-webkit-contacts-auto-fill-button {
+      display: none !important;
+      opacity: 0 !important;
+      -webkit-appearance: none !important;
+    }
+  }
