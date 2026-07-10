@@ -542,6 +542,7 @@ function initializeCustomSelects() {
 
 
 
+
 document.addEventListener("DOMContentLoaded", function () {
   /* ==========================================================================
      ELEMENTS
@@ -601,13 +602,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /*
    * null = nombre illimité.
-   * Exemple : 10 pour limiter à 10 Guests.
+   * Exemple : const MAX_GUESTS = 10;
    */
   const MAX_GUESTS = null;
 
   /*
-   * Guest 2 accessible au départ.
-   * Guest 3 débloqué après ouverture de Guest 2.
+   * Guest 2 est accessible au départ.
+   * Guest 3 sera débloqué après Guest 2.
    */
   let highestUnlockedGuest = 2;
 
@@ -615,7 +616,7 @@ document.addEventListener("DOMContentLoaded", function () {
     new Map();
 
   /*
-   * Le template est nettoyé sans modifier Guest 1.
+   * Le template est créé sans modifier Guest 1.
    */
   const guestTemplate =
     createCleanGuestTemplate(
@@ -633,23 +634,20 @@ document.addEventListener("DOMContentLoaded", function () {
   updateTabOpacity();
 
   /*
-   * On attend les scripts globaux :
-   * intl-tel-input et Flatpickr de Guest 1.
+   * Guest 1 peut déjà avoir été initialisé
+   * par les scripts globaux du site.
    */
-  window.requestAnimationFrame(
-    function () {
-      window.requestAnimationFrame(
-        function () {
-          initializeGuestPlugins(
-            firstGuestForm,
-            1
-          );
-
-          updateTabOpacity();
-        }
+  window.requestAnimationFrame(function () {
+    window.requestAnimationFrame(function () {
+      initializeGuestPhones(
+        firstGuestForm,
+        1
       );
-    }
-  );
+
+      connectFirstGuestDates();
+      updateTabOpacity();
+    });
+  });
 
   window.setTimeout(
     updateTabOpacity,
@@ -709,7 +707,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!guestNumber) return;
 
       /*
-       * Interdit Guest 3 avant Guest 2.
+       * Empêche Guest 3 avant Guest 2.
        */
       if (
         guestNumber >
@@ -726,9 +724,6 @@ document.addEventListener("DOMContentLoaded", function () {
         guestNumber
       );
 
-      /*
-       * Guest 2 débloque Guest 3.
-       */
       unlockGuest(
         guestNumber + 1
       );
@@ -743,42 +738,38 @@ document.addEventListener("DOMContentLoaded", function () {
   ========================================================================== */
 
   function prepareInitialTabs() {
-    getGuestTabs().forEach(
-      function (tab) {
-        const guestNumber =
-          getGuestNumber(tab);
+    getGuestTabs().forEach(function (tab) {
+      const guestNumber =
+        getGuestNumber(tab);
 
-        if (!guestNumber) return;
+      if (!guestNumber) return;
 
-        normalizeGuestTab(
-          tab,
-          guestNumber
-        );
+      normalizeGuestTab(
+        tab,
+        guestNumber
+      );
 
-        setTabLocked(
-          tab,
-          guestNumber > 2
-        );
-      }
-    );
+      setTabLocked(
+        tab,
+        guestNumber > 2
+      );
+    });
 
     /*
-     * Conserve uniquement le pane Guest 1.
+     * Garde uniquement le pane Guest 1.
      */
     Array.from(
       tabsContent.querySelectorAll(
         ".w-tab-pane"
       )
-    ).forEach(
-      function (pane, index) {
-        if (index > 0) {
-          pane.remove();
-        }
+    ).forEach(function (pane, index) {
+      if (index > 0) {
+        pane.remove();
       }
-    );
+    });
 
     /*
-     * Le + n’est plus traité comme un tab Webflow.
+     * Le + n’est pas un véritable tab.
      */
     addButton.removeAttribute(
       "data-w-tab"
@@ -867,9 +858,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!pane) {
       pane =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
       pane.className =
         "tab--pane-guest" +
@@ -895,11 +884,18 @@ document.addEventListener("DOMContentLoaded", function () {
     pane.dataset.guestCreated =
       "true";
 
-    initializeGuestPlugins(
+    /*
+     * Le téléphone peut être initialisé
+     * même si le panneau est masqué.
+     */
+    initializeGuestPhones(
       clonedGuestForm,
       guestNumber
     );
 
+    /*
+     * Flatpickr sera initialisé après activation du tab.
+     */
     return pane;
   }
 
@@ -913,8 +909,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (
       MAX_GUESTS &&
-      nextGuestNumber >
-        MAX_GUESTS
+      nextGuestNumber > MAX_GUESTS
     ) {
       return;
     }
@@ -994,9 +989,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     const label =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     label.textContent =
       "Guest " + guestNumber;
@@ -1030,53 +1023,49 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    getGuestTabs().forEach(
-      function (tab) {
-        const isCurrent =
-          getGuestNumber(tab) ===
-          guestNumber;
+    getGuestTabs().forEach(function (tab) {
+      const isCurrent =
+        getGuestNumber(tab) ===
+        guestNumber;
 
-        tab.classList.toggle(
-          "w--current",
-          isCurrent
+      tab.classList.toggle(
+        "w--current",
+        isCurrent
+      );
+
+      tab.setAttribute(
+        "aria-selected",
+        String(isCurrent)
+      );
+
+      tab.setAttribute(
+        "tabindex",
+        isCurrent ? "0" : "-1"
+      );
+    });
+
+    getGuestPanes().forEach(function (pane) {
+      const isCurrent =
+        Number(
+          pane.dataset.guestNumber
+        ) === guestNumber;
+
+      pane.classList.toggle(
+        "w--tab-active",
+        isCurrent
+      );
+
+      if (isCurrent) {
+        pane.removeAttribute(
+          "aria-hidden"
         );
-
-        tab.setAttribute(
-          "aria-selected",
-          String(isCurrent)
-        );
-
-        tab.setAttribute(
-          "tabindex",
-          isCurrent ? "0" : "-1"
+      } else {
+        pane.setAttribute(
+          "aria-hidden",
+          "true"
         );
       }
-    );
-
-    getGuestPanes().forEach(
-      function (pane) {
-        const isCurrent =
-          Number(
-            pane.dataset.guestNumber
-          ) === guestNumber;
-
-        pane.classList.toggle(
-          "w--tab-active",
-          isCurrent
-        );
-
-        if (isCurrent) {
-          pane.removeAttribute(
-            "aria-hidden"
-          );
-        } else {
-          pane.setAttribute(
-            "aria-hidden",
-            "true"
-          );
-        }
-      }
-    );
+    });
 
     guestTabs.setAttribute(
       "data-current",
@@ -1085,13 +1074,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateTabOpacity();
 
-    window.requestAnimationFrame(
-      function () {
-        window.dispatchEvent(
-          new Event("resize")
+    /*
+     * Le pane est maintenant visible.
+     * On peut initialiser Flatpickr correctement.
+     */
+    window.requestAnimationFrame(function () {
+      const activeGuestForm =
+        targetPane.querySelector(
+          ".form--guest"
         );
+
+      if (activeGuestForm) {
+        if (guestNumber === 1) {
+          connectFirstGuestDates();
+        } else {
+          initializeCloneDates(
+            activeGuestForm
+          );
+        }
       }
-    );
+
+      window.dispatchEvent(
+        new Event("resize")
+      );
+    });
   }
 
   /* ==========================================================================
@@ -1099,20 +1105,18 @@ document.addEventListener("DOMContentLoaded", function () {
   ========================================================================== */
 
   function updateTabOpacity() {
-    getGuestTabs().forEach(
-      function (tab) {
-        const isCurrent =
-          tab.classList.contains(
-            "w--current"
-          );
-
-        tab.style.setProperty(
-          "opacity",
-          isCurrent ? "1" : "0.35",
-          "important"
+    getGuestTabs().forEach(function (tab) {
+      const isCurrent =
+        tab.classList.contains(
+          "w--current"
         );
-      }
-    );
+
+      tab.style.setProperty(
+        "opacity",
+        isCurrent ? "1" : "0.35",
+        "important"
+      );
+    });
 
     addButton.style.setProperty(
       "opacity",
@@ -1202,51 +1206,34 @@ document.addEventListener("DOMContentLoaded", function () {
   ) {
     const elements = [
       container,
-      ...container.querySelectorAll(
-        "*"
-      )
+      ...container.querySelectorAll("*")
     ];
 
-    elements.forEach(
-      function (element) {
-        [
-          "grid-area",
-          "grid-column",
-          "grid-column-start",
-          "grid-column-end",
-          "grid-row",
-          "grid-row-start",
-          "grid-row-end",
-          "place-self",
-          "justify-self",
-          "align-self"
-        ].forEach(
-          function (property) {
-            element.style.removeProperty(
-              property
-            );
-          }
+    elements.forEach(function (element) {
+      [
+        "grid-area",
+        "grid-column",
+        "grid-column-start",
+        "grid-column-end",
+        "grid-row",
+        "grid-row-start",
+        "grid-row-end",
+        "place-self",
+        "justify-self",
+        "align-self"
+      ].forEach(function (property) {
+        element.style.removeProperty(
+          property
         );
+      });
 
-        delete element.dataset
-          .gridColumnStart;
-
-        delete element.dataset
-          .gridColumnEnd;
-
-        delete element.dataset
-          .gridRowStart;
-
-        delete element.dataset
-          .gridRowEnd;
-
-        delete element.dataset
-          .justifySelf;
-
-        delete element.dataset
-          .alignSelf;
-      }
-    );
+      delete element.dataset.gridColumnStart;
+      delete element.dataset.gridColumnEnd;
+      delete element.dataset.gridRowStart;
+      delete element.dataset.gridRowEnd;
+      delete element.dataset.justifySelf;
+      delete element.dataset.alignSelf;
+    });
   }
 
   /* ==========================================================================
@@ -1265,163 +1252,146 @@ document.addEventListener("DOMContentLoaded", function () {
 
     container
       .querySelectorAll("[id]")
-      .forEach(
-        function (element) {
-          const originalId =
-            element.id;
+      .forEach(function (element) {
+        const originalId =
+          element.id;
 
-          if (!originalId) return;
+        if (!originalId) return;
 
-          /*
-           * Conserve les IDs Webflow.
-           */
-          if (
-            originalId.startsWith(
-              "w-node-"
-            )
-          ) {
-            return;
-          }
+        /*
+         * Garde les IDs Webflow w-node-*.
+         */
+        if (
+          originalId.startsWith(
+            "w-node-"
+          )
+        ) {
+          return;
+        }
 
-          /*
-           * Supprime les IDs techniques.
-           */
-          if (
-            originalId.startsWith(
-              "iti-"
-            ) ||
-            originalId.startsWith(
-              "flatpickr-"
-            )
-          ) {
-            element.removeAttribute(
-              "id"
-            );
-
-            return;
-          }
-
-          const newId =
-            addSuffixOnce(
-              originalId,
-              suffix
-            );
-
-          idMap.set(
-            originalId,
-            newId
+        if (
+          originalId.startsWith(
+            "iti-"
+          ) ||
+          originalId.startsWith(
+            "flatpickr-"
+          )
+        ) {
+          element.removeAttribute(
+            "id"
           );
 
-          element.id =
-            newId;
+          return;
         }
-      );
+
+        const newId =
+          addSuffixOnce(
+            originalId,
+            suffix
+          );
+
+        idMap.set(
+          originalId,
+          newId
+        );
+
+        element.id =
+          newId;
+      });
 
     container
       .querySelectorAll(
         "input[name], select[name], textarea[name]"
       )
-      .forEach(
-        function (field) {
-          const originalName =
-            field.getAttribute(
-              "name"
-            );
-
-          if (!originalName) return;
-
-          field.name =
-            addSuffixOnce(
-              originalName,
-              suffix
-            );
-
-          const originalDataName =
-            field.getAttribute(
-              "data-name"
-            ) ||
-            getReadableFieldName(
-              field
-            );
-
-          field.setAttribute(
-            "data-name",
-            addReadableGuestSuffix(
-              originalDataName,
-              guestNumber
-            )
+      .forEach(function (field) {
+        const originalName =
+          field.getAttribute(
+            "name"
           );
-        }
-      );
+
+        if (!originalName) return;
+
+        field.name =
+          addSuffixOnce(
+            originalName,
+            suffix
+          );
+
+        const originalDataName =
+          field.getAttribute(
+            "data-name"
+          ) ||
+          getReadableFieldName(
+            field
+          );
+
+        field.setAttribute(
+          "data-name",
+          addReadableGuestSuffix(
+            originalDataName,
+            guestNumber
+          )
+        );
+      });
 
     container
       .querySelectorAll(
         "label[for]"
       )
-      .forEach(
-        function (label) {
-          const originalFor =
-            label.getAttribute(
-              "for"
-            );
+      .forEach(function (label) {
+        const originalFor =
+          label.getAttribute(
+            "for"
+          );
 
-          if (
-            originalFor &&
-            idMap.has(originalFor)
-          ) {
-            label.setAttribute(
-              "for",
-              idMap.get(
-                originalFor
-              )
-            );
-          }
+        if (
+          originalFor &&
+          idMap.has(originalFor)
+        ) {
+          label.setAttribute(
+            "for",
+            idMap.get(
+              originalFor
+            )
+          );
         }
-      );
+      });
 
     [
       "aria-controls",
       "aria-labelledby",
       "aria-describedby",
       "list"
-    ].forEach(
-      function (attribute) {
-        container
-          .querySelectorAll(
-            "[" +
-              attribute +
-              "]"
-          )
-          .forEach(
-            function (element) {
-              const value =
-                element.getAttribute(
-                  attribute
+    ].forEach(function (attribute) {
+      container
+        .querySelectorAll(
+          "[" + attribute + "]"
+        )
+        .forEach(function (element) {
+          const value =
+            element.getAttribute(
+              attribute
+            );
+
+          if (!value) return;
+
+          const updatedValue =
+            value
+              .split(/\s+/)
+              .map(function (id) {
+                return (
+                  idMap.get(id) ||
+                  id
                 );
+              })
+              .join(" ");
 
-              if (!value) return;
-
-              const updatedValue =
-                value
-                  .split(/\s+/)
-                  .map(
-                    function (id) {
-                      return (
-                        idMap.get(id) ||
-                        id
-                      );
-                    }
-                  )
-                  .join(" ");
-
-              element.setAttribute(
-                attribute,
-                updatedValue
-              );
-            }
+          element.setAttribute(
+            attribute,
+            updatedValue
           );
-      }
-    );
+        });
+    });
   }
 
   function addSuffixOnce(
@@ -1488,169 +1458,152 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     /* --------------------------------------------------------------------------
-       PHONE TEMPLATE CLEANUP
+       PHONE
     -------------------------------------------------------------------------- */
 
     template
       .querySelectorAll(".iti")
-      .forEach(
-        function (itiWrapper) {
-          const phoneInput =
-            itiWrapper.querySelector(
-              'input[type="tel"], input.is--phone'
-            );
-
-          if (!phoneInput) {
-            itiWrapper.remove();
-            return;
-          }
-
-          const cleanPhoneInput =
-            phoneInput.cloneNode(true);
-
-          /*
-           * Transfère seulement les classes Webflow.
-           */
-          Array.from(
-            itiWrapper.classList
-          ).forEach(
-            function (className) {
-              if (
-                className.startsWith(
-                  "w-node-"
-                )
-              ) {
-                cleanPhoneInput
-                  .classList
-                  .add(className);
-              }
-            }
+      .forEach(function (itiWrapper) {
+        const phoneInput =
+          itiWrapper.querySelector(
+            'input[type="tel"], input.is--phone'
           );
 
-          cleanPhoneInput.value =
-            "";
-
-          cleanPhoneInput.removeAttribute(
-            "data-iti-initialized"
-          );
-
-          cleanPhoneInput.removeAttribute(
-            "data-intl-tel-input-id"
-          );
-
-          cleanPhoneInput.removeAttribute(
-            "data-guest-phone-initialized"
-          );
-
-          cleanPhoneInput.removeAttribute(
-            "data-guest-phone-sync-ready"
-          );
-
-          cleanPhoneInput.removeAttribute(
-            "aria-invalid"
-          );
-
-          cleanPhoneInput.removeAttribute(
-            "aria-describedby"
-          );
-
-          cleanPhoneInput.classList.remove(
-            "iti__tel-input"
-          );
-
-          itiWrapper.replaceWith(
-            cleanPhoneInput
-          );
+        if (!phoneInput) {
+          itiWrapper.remove();
+          return;
         }
-      );
+
+        const cleanPhoneInput =
+          phoneInput.cloneNode(true);
+
+        Array.from(
+          itiWrapper.classList
+        ).forEach(function (className) {
+          if (
+            className.startsWith(
+              "w-node-"
+            )
+          ) {
+            cleanPhoneInput
+              .classList
+              .add(className);
+          }
+        });
+
+        cleanPhoneInput.value = "";
+
+        cleanPhoneInput.removeAttribute(
+          "data-iti-initialized"
+        );
+
+        cleanPhoneInput.removeAttribute(
+          "data-intl-tel-input-id"
+        );
+
+        cleanPhoneInput.removeAttribute(
+          "data-guest-phone-initialized"
+        );
+
+        cleanPhoneInput.removeAttribute(
+          "data-guest-phone-sync-ready"
+        );
+
+        cleanPhoneInput.removeAttribute(
+          "aria-invalid"
+        );
+
+        cleanPhoneInput.removeAttribute(
+          "aria-describedby"
+        );
+
+        cleanPhoneInput.classList.remove(
+          "iti__tel-input"
+        );
+
+        itiWrapper.replaceWith(
+          cleanPhoneInput
+        );
+      });
 
     /* --------------------------------------------------------------------------
-       DATE TEMPLATE CLEANUP
+       FLATPICKR
     -------------------------------------------------------------------------- */
 
     /*
-     * Supprime uniquement les champs visibles alternatifs
-     * générés par Flatpickr.
-     *
-     * Les vrais champs Webflow possèdent un name.
+     * Retire les altInputs déjà créés.
      */
     template
       .querySelectorAll(
         [
           'input[data-flatpickr-alt="true"]',
           "input.is--date:not([name])",
-          "input.flatpickr-input:not([name])"
+          "input.flatpickr-input:not([name])",
+          "input.form-control:not([name])"
         ].join(",")
       )
-      .forEach(
-        function (input) {
-          input.remove();
-        }
-      );
+      .forEach(function (input) {
+        input.remove();
+      });
 
     /*
-     * Nettoie les vrais champs destinés aux clones.
-     * Guest 1 n’est pas affecté.
+     * Prépare les vrais champs date des clones.
      */
     template
       .querySelectorAll(
         "input.is--date[name]"
       )
-      .forEach(
-        function (input) {
-          input._flatpickr =
-            null;
+      .forEach(function (input) {
+        input._flatpickr = null;
 
-          input.type =
-            "text";
+        input.type = "text";
+        input.value = "";
+        input.readOnly = false;
 
-          input.value =
-            "";
+        input.removeAttribute(
+          "readonly"
+        );
 
-          input.readOnly =
-            false;
+        input.removeAttribute(
+          "data-datepicker-initialized"
+        );
 
-          input.removeAttribute(
-            "readonly"
-          );
+        input.removeAttribute(
+          "data-guest-date-initialized"
+        );
 
-          input.removeAttribute(
-            "data-datepicker-initialized"
-          );
+        input.removeAttribute(
+          "data-guest-date-link-ready"
+        );
 
-          input.removeAttribute(
-            "data-guest-date-initialized"
-          );
+        input.removeAttribute(
+          "data-flatpickr-alt"
+        );
 
-          input.removeAttribute(
-            "data-guest-date-link-ready"
-          );
+        input.removeAttribute(
+          "aria-hidden"
+        );
 
-          input.removeAttribute(
-            "data-flatpickr-alt"
-          );
+        input.removeAttribute(
+          "aria-invalid"
+        );
 
-          input.removeAttribute(
-            "aria-hidden"
-          );
+        input.removeAttribute(
+          "aria-describedby"
+        );
 
-          input.removeAttribute(
-            "tabindex"
-          );
+        input.removeAttribute(
+          "tabindex"
+        );
 
-          input.removeAttribute(
-            "aria-invalid"
-          );
+        input.classList.remove(
+          "flatpickr-input"
+        );
 
-          input.removeAttribute(
-            "aria-describedby"
-          );
-
-          input.classList.remove(
-            "flatpickr-input"
-          );
-        }
-      );
+        input.classList.add(
+          "is--date"
+        );
+      });
 
     /*
      * Hidden fields téléphone.
@@ -1662,14 +1615,12 @@ document.addEventListener("DOMContentLoaded", function () {
           'input[type="hidden"][name$="-country"]'
         ].join(",")
       )
-      .forEach(
-        function (input) {
-          input.remove();
-        }
-      );
+      .forEach(function (input) {
+        input.remove();
+      });
 
     /*
-     * États de formulaire.
+     * États d’erreur/succès.
      */
     template
       .querySelectorAll(
@@ -1681,11 +1632,9 @@ document.addEventListener("DOMContentLoaded", function () {
           ".w-form-fail"
         ].join(",")
       )
-      .forEach(
-        function (element) {
-          element.remove();
-        }
-      );
+      .forEach(function (element) {
+        element.remove();
+      });
 
     return template;
   }
@@ -1701,74 +1650,42 @@ document.addEventListener("DOMContentLoaded", function () {
       .querySelectorAll(
         "input, select, textarea"
       )
-      .forEach(
-        function (field) {
-          field.classList.remove(
-            "is--error"
-          );
+      .forEach(function (field) {
+        field.classList.remove(
+          "is--error"
+        );
 
-          field.removeAttribute(
-            "aria-invalid"
-          );
+        field.removeAttribute(
+          "aria-invalid"
+        );
 
-          field.setCustomValidity("");
+        field.setCustomValidity("");
 
-          if (
-            field.type ===
-              "checkbox" ||
-            field.type ===
-              "radio"
-          ) {
-            field.checked =
-              false;
-
-            return;
-          }
-
-          if (
-            field.type ===
-              "submit" ||
-            field.type ===
-              "button" ||
-            field.type ===
-              "reset"
-          ) {
-            return;
-          }
-
-          if (
-            field.tagName ===
-            "SELECT"
-          ) {
-            field.selectedIndex =
-              0;
-
-            return;
-          }
-
-          field.value =
-            "";
+        if (
+          field.type === "checkbox" ||
+          field.type === "radio"
+        ) {
+          field.checked = false;
+          return;
         }
-      );
-  }
 
-  /* ==========================================================================
-     PLUGINS
-  ========================================================================== */
+        if (
+          field.type === "submit" ||
+          field.type === "button" ||
+          field.type === "reset"
+        ) {
+          return;
+        }
 
-  function initializeGuestPlugins(
-    container,
-    guestNumber
-  ) {
-    initializeGuestPhones(
-      container,
-      guestNumber
-    );
+        if (
+          field.tagName === "SELECT"
+        ) {
+          field.selectedIndex = 0;
+          return;
+        }
 
-    initializeGuestDates(
-      container,
-      guestNumber
-    );
+        field.value = "";
+      });
   }
 
   /* ==========================================================================
@@ -1784,98 +1701,80 @@ document.addEventListener("DOMContentLoaded", function () {
         'input[type="tel"], input.is--phone'
       );
 
-    phoneInputs.forEach(
-      function (phoneInput) {
-        let instance =
-          null;
+    phoneInputs.forEach(function (phoneInput) {
+      let instance = null;
+
+      if (
+        window.intlTelInput &&
+        typeof window.intlTelInput
+          .getInstance === "function"
+      ) {
+        instance =
+          window.intlTelInput.getInstance(
+            phoneInput
+          );
+      }
+
+      if (!instance) {
+        if (
+          phoneInput.dataset
+            .guestPhoneInitialized ===
+          "true"
+        ) {
+          return;
+        }
 
         if (
-          window.intlTelInput &&
-          typeof window
-            .intlTelInput
-            .getInstance ===
-            "function"
+          typeof window.intlTelInput !==
+          "function"
         ) {
-          instance =
-            window.intlTelInput
-              .getInstance(
-                phoneInput
-              );
+          return;
         }
-
-        if (!instance) {
-          if (
-            phoneInput.dataset
-              .guestPhoneInitialized ===
-            "true"
-          ) {
-            return;
-          }
-
-          if (
-            typeof window
-              .intlTelInput !==
-            "function"
-          ) {
-            return;
-          }
-
-          phoneInput.dataset
-            .guestPhoneInitialized =
-            "true";
-
-          instance =
-            window.intlTelInput(
-              phoneInput,
-              {
-                initialCountry:
-                  "ma",
-
-                separateDialCode:
-                  true,
-
-                nationalMode:
-                  true,
-
-                autoPlaceholder:
-                  "aggressive",
-
-                countrySearch:
-                  true,
-
-                fixDropdownWidth:
-                  false,
-
-                loadUtils:
-                  function () {
-                    return import(
-                      "https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/utils.js"
-                    );
-                  }
-              }
-            );
-        }
-
-        phoneInstances.set(
-          phoneInput,
-          instance
-        );
 
         phoneInput.dataset
           .guestPhoneInitialized =
           "true";
 
-        preservePhoneClass(
-          phoneInput
-        );
+        instance =
+          window.intlTelInput(
+            phoneInput,
+            {
+              initialCountry: "ma",
+              separateDialCode: true,
+              nationalMode: true,
+              autoPlaceholder:
+                "aggressive",
+              countrySearch: true,
+              fixDropdownWidth: false,
 
-        createPhoneHiddenFields(
-          container,
-          phoneInput,
-          instance
-        );
+              loadUtils: function () {
+                return import(
+                  "https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/utils.js"
+                );
+              }
+            }
+          );
       }
-    );
+
+      phoneInstances.set(
+        phoneInput,
+        instance
+      );
+
+      phoneInput.dataset
+        .guestPhoneInitialized =
+        "true";
+
+      preservePhoneClass(
+        phoneInput
+      );
+
+      createPhoneHiddenFields(
+        container,
+        phoneInput,
+        instance
+      );
+    });
   }
 
   function preservePhoneClass(
@@ -1888,19 +1787,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     Array.from(
       phoneInput.classList
-    ).forEach(
-      function (className) {
-        if (
-          className.startsWith(
-            "w-node-"
-          )
-        ) {
-          wrapper.classList.add(
-            className
-          );
-        }
+    ).forEach(function (className) {
+      if (
+        className.startsWith(
+          "w-node-"
+        )
+      ) {
+        wrapper.classList.add(
+          className
+        );
       }
-    );
+    });
 
     clearGeneratedGridStyles(
       wrapper
@@ -1917,12 +1814,10 @@ document.addEventListener("DOMContentLoaded", function () {
     instance
   ) {
     const fullName =
-      phoneInput.name +
-      "-full";
+      phoneInput.name + "-full";
 
     const countryName =
-      phoneInput.name +
-      "-country";
+      phoneInput.name + "-country";
 
     let fullField =
       container.querySelector(
@@ -1940,15 +1835,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!fullField) {
       fullField =
-        document.createElement(
-          "input"
-        );
+        document.createElement("input");
 
-      fullField.type =
-        "hidden";
-
-      fullField.name =
-        fullName;
+      fullField.type = "hidden";
+      fullField.name = fullName;
 
       fullField.setAttribute(
         "data-name",
@@ -1964,15 +1854,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!countryField) {
       countryField =
-        document.createElement(
-          "input"
-        );
+        document.createElement("input");
 
-      countryField.type =
-        "hidden";
-
-      countryField.name =
-        countryName;
+      countryField.type = "hidden";
+      countryField.name = countryName;
 
       countryField.setAttribute(
         "data-name",
@@ -2029,12 +1914,65 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     DATES
+     DATES — GUEST 1
   ========================================================================== */
 
-  function initializeGuestDates(
-    container,
-    guestNumber
+  function connectFirstGuestDates() {
+    const arrivalInput =
+      findDateField(
+        firstGuestForm,
+        "arrival"
+      );
+
+    const departureInput =
+      findDateField(
+        firstGuestForm,
+        "departure"
+      );
+
+    if (
+      !arrivalInput ||
+      !departureInput
+    ) {
+      return;
+    }
+
+    const arrivalPicker =
+      arrivalInput._flatpickr;
+
+    const departurePicker =
+      departureInput._flatpickr;
+
+    /*
+     * Le script calendrier global n’a peut-être
+     * pas encore terminé.
+     */
+    if (
+      !arrivalPicker ||
+      !departurePicker
+    ) {
+      window.setTimeout(
+        connectFirstGuestDates,
+        250
+      );
+
+      return;
+    }
+
+    connectDatePickers(
+      arrivalInput,
+      departureInput,
+      arrivalPicker,
+      departurePicker
+    );
+  }
+
+  /* ==========================================================================
+     DATES — CLONES
+  ========================================================================== */
+
+  function initializeCloneDates(
+    container
   ) {
     const arrivalInput =
       findDateField(
@@ -2061,9 +1999,8 @@ document.addEventListener("DOMContentLoaded", function () {
     ) {
       window.setTimeout(
         function () {
-          initializeGuestDates(
-            container,
-            guestNumber
+          initializeCloneDates(
+            container
           );
         },
         200
@@ -2072,64 +2009,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /* --------------------------------------------------------------------------
-       GUEST 1 — KEEP EXISTING FLATPICKR
-    -------------------------------------------------------------------------- */
-
-    if (guestNumber === 1) {
-      const arrivalPicker =
-        arrivalInput._flatpickr ||
-        null;
-
-      const departurePicker =
-        departureInput._flatpickr ||
-        null;
-
-      /*
-       * Le script global peut être encore en cours.
-       * On ne détruit rien et on retente.
-       */
-      if (
-        !arrivalPicker ||
-        !departurePicker
-      ) {
-        window.setTimeout(
-          function () {
-            initializeGuestDates(
-              container,
-              1
-            );
-          },
-          250
-        );
-
-        return;
-      }
-
-      connectDatePickers(
-        arrivalInput,
-        departureInput,
-        arrivalPicker,
-        departurePicker
-      );
-
-      arrivalInput.dataset
-        .guestDateInitialized =
-        "true";
-
-      departureInput.dataset
-        .guestDateInitialized =
-        "true";
-
-      return;
-    }
-
-    /* --------------------------------------------------------------------------
-       CLONES
-    -------------------------------------------------------------------------- */
-
     /*
-     * Si déjà initialisés, ne pas recréer.
+     * Déjà initialisés.
      */
     if (
       arrivalInput._flatpickr &&
@@ -2157,133 +2038,115 @@ document.addEventListener("DOMContentLoaded", function () {
       departureInput
     );
 
-    let departurePicker =
-      null;
+    let departurePicker = null;
+
+    /* --------------------------------------------------------------------------
+       ARRIVAL
+    -------------------------------------------------------------------------- */
 
     const arrivalPicker =
       window.flatpickr(
         arrivalInput,
         {
-          dateFormat:
-            "Y-m-d",
+          dateFormat: "Y-m-d",
+          allowInput: false,
+          clickOpens: true,
+          disableMobile: true,
+          altInput: false,
 
-          allowInput:
-            false,
+          onChange: function (
+            selectedDates
+          ) {
+            const arrivalDate =
+              selectedDates[0] || null;
 
-          clickOpens:
-            true,
+            departureInput
+              .setCustomValidity("");
 
-          disableMobile:
-            true,
+            if (!departurePicker) {
+              return;
+            }
 
-          /*
-           * Pas de second champ visible sur les clones.
-           */
-          altInput:
-            false,
-
-          onChange:
-            function (
-              selectedDates
-            ) {
-              const arrivalDate =
-                selectedDates[0] ||
-                null;
-
-              departureInput
-                .setCustomValidity("");
-
-              if (!departurePicker) {
-                return;
-              }
-
-              if (!arrivalDate) {
-                departurePicker.set(
-                  "minDate",
-                  null
-                );
-
-                return;
-              }
-
+            if (!arrivalDate) {
               departurePicker.set(
                 "minDate",
-                addDays(
-                  arrivalDate,
-                  1
-                )
+                null
               );
 
-              const currentDeparture =
-                departurePicker
-                  .selectedDates[0];
-
-              if (
-                currentDeparture &&
-                currentDeparture <=
-                  arrivalDate
-              ) {
-                departurePicker.clear();
-              }
-
-              validateDateRange(
-                arrivalInput,
-                departureInput
-              );
+              return;
             }
+
+            departurePicker.set(
+              "minDate",
+              addDays(
+                arrivalDate,
+                1
+              )
+            );
+
+            const currentDeparture =
+              departurePicker
+                .selectedDates[0];
+
+            if (
+              currentDeparture &&
+              currentDeparture <=
+                arrivalDate
+            ) {
+              departurePicker.clear();
+            }
+
+            validateDateRange(
+              arrivalInput,
+              departureInput
+            );
+          }
         }
       );
+
+    /* --------------------------------------------------------------------------
+       DEPARTURE
+    -------------------------------------------------------------------------- */
 
     departurePicker =
       window.flatpickr(
         departureInput,
         {
-          dateFormat:
-            "Y-m-d",
+          dateFormat: "Y-m-d",
+          allowInput: false,
+          clickOpens: true,
+          disableMobile: true,
+          altInput: false,
 
-          allowInput:
-            false,
+          onOpen: function () {
+            const arrivalDate =
+              arrivalPicker
+                .selectedDates[0];
 
-          clickOpens:
-            true,
-
-          disableMobile:
-            true,
-
-          altInput:
-            false,
-
-          onOpen:
-            function () {
-              const arrivalDate =
-                arrivalPicker
-                  .selectedDates[0];
-
-              if (!arrivalDate) {
-                departurePicker.set(
-                  "minDate",
-                  null
-                );
-
-                return;
-              }
-
+            if (!arrivalDate) {
               departurePicker.set(
                 "minDate",
-                addDays(
-                  arrivalDate,
-                  1
-                )
+                null
               );
-            },
 
-          onChange:
-            function () {
-              validateDateRange(
-                arrivalInput,
-                departureInput
-              );
+              return;
             }
+
+            departurePicker.set(
+              "minDate",
+              addDays(
+                arrivalDate,
+                1
+              )
+            );
+          },
+
+          onChange: function () {
+            validateDateRange(
+              arrivalInput,
+              departureInput
+            );
+          }
         }
       );
 
@@ -2303,8 +2166,73 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
+  function removeCloneDateArtifacts(
+    container
+  ) {
+    container
+      .querySelectorAll(
+        [
+          'input[data-flatpickr-alt="true"]',
+          "input.is--date:not([name])",
+          "input.flatpickr-input:not([name])",
+          "input.form-control:not([name])"
+        ].join(",")
+      )
+      .forEach(function (input) {
+        input.remove();
+      });
+  }
+
+  function prepareCloneDateInput(
+    input
+  ) {
+    if (!input) return;
+
+    input._flatpickr = null;
+
+    input.type = "text";
+    input.value = "";
+    input.readOnly = false;
+
+    input.removeAttribute(
+      "readonly"
+    );
+
+    input.removeAttribute(
+      "data-datepicker-initialized"
+    );
+
+    input.removeAttribute(
+      "data-guest-date-initialized"
+    );
+
+    input.removeAttribute(
+      "data-guest-date-link-ready"
+    );
+
+    input.removeAttribute(
+      "data-flatpickr-alt"
+    );
+
+    input.removeAttribute(
+      "aria-hidden"
+    );
+
+    input.removeAttribute(
+      "tabindex"
+    );
+
+    input.classList.remove(
+      "flatpickr-input"
+    );
+
+    input.classList.add(
+      "is--date"
+    );
+  }
+
   /* ==========================================================================
-     DATE — CONNECT ARRIVAL / DEPARTURE
+     DATE CONNECTION
   ========================================================================== */
 
   function connectDatePickers(
@@ -2365,9 +2293,6 @@ document.addEventListener("DOMContentLoaded", function () {
       );
     }
 
-    /*
-     * Évite les listeners en double.
-     */
     if (
       arrivalInput.dataset
         .guestDateLinkReady !==
@@ -2406,10 +2331,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updateDepartureMinimum();
   }
 
-  /* ==========================================================================
-     DATE — FIND FIELD
-  ========================================================================== */
-
   function findDateField(
     container,
     type
@@ -2422,123 +2343,33 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
     return (
-      fields.find(
-        function (input) {
-          const text = [
-            input.name,
-            input.id,
-            input.getAttribute(
-              "data-name"
-            ),
-            input.placeholder
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
+      fields.find(function (input) {
+        const text = [
+          input.name,
+          input.id,
+          input.getAttribute(
+            "data-name"
+          ),
+          input.placeholder
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-          if (type === "arrival") {
-            return (
-              text.includes(
-                "arrival"
-              ) ||
-              text.includes(
-                "arrivals"
-              )
-            );
-          }
-
+        if (type === "arrival") {
           return (
-            text.includes(
-              "departure"
-            ) ||
-            text.includes(
-              "departures"
-            )
+            text.includes("arrival") ||
+            text.includes("arrivals")
           );
         }
-      ) || null
+
+        return (
+          text.includes("departure") ||
+          text.includes("departures")
+        );
+      }) || null
     );
   }
-
-  /* ==========================================================================
-     DATE — CLEAN CLONE ONLY
-  ========================================================================== */
-
-  function removeCloneDateArtifacts(
-    container
-  ) {
-    container
-      .querySelectorAll(
-        [
-          'input[data-flatpickr-alt="true"]',
-          "input.is--date:not([name])",
-          "input.flatpickr-input:not([name])"
-        ].join(",")
-      )
-      .forEach(
-        function (input) {
-          input.remove();
-        }
-      );
-  }
-
-  function prepareCloneDateInput(
-    input
-  ) {
-    if (!input) return;
-
-    /*
-     * Ne détruit aucune instance existante.
-     * Cette fonction est réservée aux clones propres.
-     */
-    input._flatpickr =
-      null;
-
-    input.type =
-      "text";
-
-    input.value =
-      "";
-
-    input.readOnly =
-      false;
-
-    input.removeAttribute(
-      "readonly"
-    );
-
-    input.removeAttribute(
-      "data-datepicker-initialized"
-    );
-
-    input.removeAttribute(
-      "data-guest-date-initialized"
-    );
-
-    input.removeAttribute(
-      "data-guest-date-link-ready"
-    );
-
-    input.removeAttribute(
-      "data-flatpickr-alt"
-    );
-
-    input.removeAttribute(
-      "aria-hidden"
-    );
-
-    input.removeAttribute(
-      "tabindex"
-    );
-
-    input.classList.remove(
-      "flatpickr-input"
-    );
-  }
-
-  /* ==========================================================================
-     DATE — HELPERS
-  ========================================================================== */
 
   function addDays(
     date,
@@ -2555,11 +2386,105 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     result.setDate(
-      result.getDate() +
-        days
+      result.getDate() + days
     );
 
     return result;
+  }
+
+  function getDateFromInput(
+    input
+  ) {
+    if (
+      input._flatpickr &&
+      input._flatpickr
+        .selectedDates[0]
+    ) {
+      const date =
+        new Date(
+          input._flatpickr
+            .selectedDates[0]
+        );
+
+      date.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      return date;
+    }
+
+    return parseDateValue(
+      input.value
+    );
+  }
+
+  function parseDateValue(
+    value
+  ) {
+    const normalized =
+      String(value || "").trim();
+
+    let match =
+      normalized.match(
+        /^(\d{4})-(\d{2})-(\d{2})$/
+      );
+
+    if (match) {
+      return createSafeDate(
+        Number(match[1]),
+        Number(match[2]),
+        Number(match[3])
+      );
+    }
+
+    match =
+      normalized.match(
+        /^(\d{2})\/(\d{2})\/(\d{4})$/
+      );
+
+    if (match) {
+      return createSafeDate(
+        Number(match[3]),
+        Number(match[2]),
+        Number(match[1])
+      );
+    }
+
+    return null;
+  }
+
+  function createSafeDate(
+    year,
+    month,
+    day
+  ) {
+    const date =
+      new Date(
+        year,
+        month - 1,
+        day
+      );
+
+    date.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !==
+        month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return date;
   }
 
   function validateDateRange(
@@ -2611,143 +2536,37 @@ document.addEventListener("DOMContentLoaded", function () {
     return true;
   }
 
-  function getDateFromInput(
-    input
-  ) {
-    if (
-      input._flatpickr &&
-      input._flatpickr
-        .selectedDates[0]
-    ) {
-      const date =
-        new Date(
-          input._flatpickr
-            .selectedDates[0]
-        );
-
-      date.setHours(
-        0,
-        0,
-        0,
-        0
-      );
-
-      return date;
-    }
-
-    return parseDateValue(
-      input.value
-    );
-  }
-
-  function parseDateValue(
-    value
-  ) {
-    const normalized =
-      String(value || "")
-        .trim();
-
-    /*
-     * YYYY-MM-DD
-     */
-    let match =
-      normalized.match(
-        /^(\d{4})-(\d{2})-(\d{2})$/
-      );
-
-    if (match) {
-      return createSafeDate(
-        Number(match[1]),
-        Number(match[2]),
-        Number(match[3])
-      );
-    }
-
-    /*
-     * DD/MM/YYYY
-     */
-    match =
-      normalized.match(
-        /^(\d{2})\/(\d{2})\/(\d{4})$/
-      );
-
-    if (match) {
-      return createSafeDate(
-        Number(match[3]),
-        Number(match[2]),
-        Number(match[1])
-      );
-    }
-
-    return null;
-  }
-
-  function createSafeDate(
-    year,
-    month,
-    day
-  ) {
-    const date =
-      new Date(
-        year,
-        month - 1,
-        day
-      );
-
-    date.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    if (
-      date.getFullYear() !== year ||
-      date.getMonth() !==
-        month - 1 ||
-      date.getDate() !== day
-    ) {
-      return null;
-    }
-
-    return date;
-  }
-
   function validateAllDates() {
-    let valid =
-      true;
+    let valid = true;
 
     guestFormWrapper
       .querySelectorAll(
         ".form--guest"
       )
-      .forEach(
-        function (guestForm) {
-          const arrivalInput =
-            findDateField(
-              guestForm,
-              "arrival"
-            );
+      .forEach(function (guestForm) {
+        const arrivalInput =
+          findDateField(
+            guestForm,
+            "arrival"
+          );
 
-          const departureInput =
-            findDateField(
-              guestForm,
-              "departure"
-            );
+        const departureInput =
+          findDateField(
+            guestForm,
+            "departure"
+          );
 
-          if (
-            arrivalInput &&
-            departureInput &&
-            !validateDateRange(
-              arrivalInput,
-              departureInput
-            )
-          ) {
-            valid =
-              false;
-          }
+        if (
+          arrivalInput &&
+          departureInput &&
+          !validateDateRange(
+            arrivalInput,
+            departureInput
+          )
+        ) {
+          valid = false;
         }
-      );
+      });
 
     return valid;
   }
@@ -2799,32 +2618,30 @@ document.addEventListener("DOMContentLoaded", function () {
         ".submit--btn"
       ].join(",")
     )
-    .forEach(
-      function (button) {
-        button.addEventListener(
-          "click",
-          function (event) {
-            validateAllDates();
+    .forEach(function (button) {
+      button.addEventListener(
+        "click",
+        function (event) {
+          validateAllDates();
 
-            const invalidField =
-              getFirstInvalidField();
+          const invalidField =
+            getFirstInvalidField();
 
-            if (!invalidField) {
-              synchronizeAllPhones();
-              return;
-            }
+          if (!invalidField) {
+            synchronizeAllPhones();
+            return;
+          }
 
-            event.preventDefault();
-            event.stopImmediatePropagation();
+          event.preventDefault();
+          event.stopImmediatePropagation();
 
-            showInvalidField(
-              invalidField
-            );
-          },
-          true
-        );
-      }
-    );
+          showInvalidField(
+            invalidField
+          );
+        },
+        true
+      );
+    });
 
   guestFormWrapper.addEventListener(
     "submit",
@@ -2851,32 +2668,27 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   function getFirstInvalidField() {
-    const fields =
+    return (
       Array.from(
         guestFormWrapper.querySelectorAll(
           "input, select, textarea"
         )
-      );
-
-    return (
-      fields.find(
-        function (field) {
-          if (field.disabled) {
-            return false;
-          }
-
-          if (
-            field.type === "hidden" ||
-            field.type === "submit" ||
-            field.type === "button" ||
-            field.type === "reset"
-          ) {
-            return false;
-          }
-
-          return !field.checkValidity();
+      ).find(function (field) {
+        if (field.disabled) {
+          return false;
         }
-      ) || null
+
+        if (
+          field.type === "hidden" ||
+          field.type === "submit" ||
+          field.type === "button" ||
+          field.type === "reset"
+        ) {
+          return false;
+        }
+
+        return !field.checkValidity();
+      }) || null
     );
   }
 
@@ -2901,45 +2713,37 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    window.requestAnimationFrame(
-      function () {
+    window.requestAnimationFrame(function () {
+      if (field._flatpickr) {
         if (
-          field._flatpickr
+          field._flatpickr.altInput
         ) {
-          /*
-           * Ouvre le picker du vrai input
-           * ou de son altInput existant.
-           */
-          if (
-            field._flatpickr.altInput
-          ) {
-            field._flatpickr
-              .altInput
-              .focus();
-          } else {
-            field.focus();
-          }
-
-          field._flatpickr.open();
-          return;
-        }
-
-        field.reportValidity();
-
-        try {
-          field.focus({
-            preventScroll: true
-          });
-        } catch (error) {
+          field._flatpickr
+            .altInput
+            .focus();
+        } else {
           field.focus();
         }
 
-        field.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
+        field._flatpickr.open();
+        return;
       }
-    );
+
+      field.reportValidity();
+
+      try {
+        field.focus({
+          preventScroll: true
+        });
+      } catch (error) {
+        field.focus();
+      }
+
+      field.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
   }
 
   /* ==========================================================================
@@ -2999,7 +2803,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /* ==========================================================================
-     NORMALIZATION
+     NORMALIZATION / GETTERS
   ========================================================================== */
 
   function normalizeGuestTab(
@@ -3063,10 +2867,6 @@ document.addEventListener("DOMContentLoaded", function () {
       )
     );
   }
-
-  /* ==========================================================================
-     GETTERS
-  ========================================================================== */
 
   function getGuestTabs() {
     return Array.from(
@@ -3141,9 +2941,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const numbers =
       getGuestTabs()
         .map(getGuestNumber)
-        .filter(
-          Number.isFinite
-        );
+        .filter(Number.isFinite);
 
     return numbers.length
       ? Math.max(...numbers)
