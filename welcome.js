@@ -1,415 +1,429 @@
+
 /* ==========================================================================
-   PHONE FIELD
+   BOOKING PAGE
+   - Phone fields: country detection + formatting
+   - Date fields: paired datepicker logic
 ========================================================================== */
 
-.iti {
-    position: relative !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    z-index: 20;
+document.addEventListener("DOMContentLoaded", function () {
+  initializePhoneFields();
+  initializeDatePickers();
+});
+
+/* ==========================================================================
+   PHONE FIELDS - COUNTRY DETECTION + FORMATTING
+========================================================================== */
+
+function initializePhoneFields() {
+  if (typeof window.intlTelInput !== "function") {
+    console.warn("intl-tel-input n'est pas chargé.");
+    return;
   }
-  
-  /* Garde exactement le padding défini pour le champ */
-  .iti > .text--field.is--phone,
-  .iti > input.is--phone,
-  .text--field.is--phone {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100% !important;
-    padding-left: 6rem !important;
-    padding-right: inherit !important;
+
+  let countryLookupPromise = null;
+
+  /* ------------------------------------------------------------------------
+     COUNTRY LOOKUP
+  ------------------------------------------------------------------------ */
+
+  function detectVisitorCountry() {
+    if (countryLookupPromise) return countryLookupPromise;
+
+    countryLookupPromise = fetch("https://ipapi.co/json/", {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      }
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Country lookup request failed");
+        }
+
+        return response.json();
+      })
+      .then(function (data) {
+        const countryCode =
+          data && typeof data.country_code === "string"
+            ? data.country_code.trim().toLowerCase()
+            : "";
+
+        return countryCode || "ma";
+      })
+      .catch(function (error) {
+        console.warn(
+          "Détection du pays impossible, utilisation de MA.",
+          error
+        );
+
+        return "ma";
+      });
+
+    return countryLookupPromise;
   }
-  
-  /* ==========================================================================
-     SELECTED COUNTRY
-  ========================================================================== */
-  
-  .iti__country-container {
-    position: absolute !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    left: 1.25rem !important;
-    display: flex !important;
-    align-items: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    z-index: 2 !important;
-  }
-  
-  .iti__selected-country {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    width: auto !important;
-    min-width: 0 !important;
-    gap: 0.35rem !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    color: inherit !important;
-  }
-  
-  .iti__selected-country-primary {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  .iti__selected-dial-code {
-    padding: 0 !important;
-    margin: 0 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-  }
-  
-  .iti__arrow {
-    margin: 0 !important;
-  }
-  
-  /* ==========================================================================
-     PHONE DROPDOWN
-  ========================================================================== */
-  
-  .iti__dropdown-content {
-    z-index: 999999 !important;
-    width: 26rem !important;
-    max-width: 90vw !important;
-    background: #f5eee7 !important;
-    color: #333 !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.18) !important;
-    opacity: 1 !important;
-    overflow: hidden !important;
-    isolation: isolate !important;
-  }
-  
-  .iti__country-container .iti__dropdown-content {
-    top: 100% !important;
-    left: 0 !important;
-  }
-  
-  /* ==========================================================================
-     PHONE SEARCH
-  ========================================================================== */
-  
-  .iti__search-input-wrapper {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
-    height: 3.5rem !important;
-    padding: 0.5rem 0.75rem !important;
-    margin: 0 !important;
-    background: #f5eee7 !important;
-  }
-  
-  .iti__search-icon {
-    position: absolute !important;
-    left: 1.5rem !important;
-    z-index: 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    pointer-events: none !important;
-  }
-  
-  .iti__search-input {
-    width: 100% !important;
-    height: 2.5rem !important;
-    min-height: 2.5rem !important;
-    padding: 0 1rem 0 2.5rem !important;
-    margin: 0 !important;
-    background: #fff !important;
-    color: #333 !important;
-    border: 1px solid rgba(0, 0, 0, 0.18) !important;
-    border-radius: 0.25rem !important;
-    font: inherit !important;
-    line-height: 1 !important;
-  }
-  
-  /* ==========================================================================
-     PHONE COUNTRY LIST
-  ========================================================================== */
-  
-  .iti__country-list {
-    max-height: 24rem !important;
-    background: #f5eee7 !important;
-  }
-  
-  .iti__country {
-    display: grid !important;
-    grid-template-columns: 1.5rem minmax(0, 1fr) auto !important;
-    align-items: center !important;
-    column-gap: 1rem !important;
-    padding: 0.85rem 1rem !important;
-    background: #f5eee7 !important;
-    opacity: 1 !important;
-  }
-  
-  .iti__country:hover,
-  .iti__country.iti__highlight {
-    background: #e8dfd6 !important;
-  }
-  
-  .iti__country-name,
-  .iti__dial-code {
-    color: #333 !important;
-    opacity: 1 !important;
-  }
-  
-  /* ==========================================================================
-     PHONE FLAGS
-  ========================================================================== */
-  
-  .iti__flag {
-    opacity: 1 !important;
-    visibility: visible !important;
-    filter: none !important;
-    mix-blend-mode: normal !important;
-    transform: none !important;
-  }
-  
-  /* ==========================================================================
-     DATE FIELDS
-  ========================================================================== */
-  
-  .text--field.is--date,
-  .text--field.is--date.flatpickr-input,
-  .flatpickr-input.text--field.is--date {
-    width: 100% !important;
-    padding-left: 1.25rem !important;
-    padding-right: 1.25rem !important;
-    background: transparent !important;
-    cursor: pointer;
-  }
-  
-  /* Input visible créé par Flatpickr */
-  input.flatpickr-input.form-control,
-  input.flatpickr-input.text--field {
-    background: transparent !important;
-  }
-  
-  /* ==========================================================================
-     DATEPICKER CONTAINER
-  ========================================================================== */
-  
-  .flatpickr-calendar {
-    width: 20rem !important;
-    padding: 1rem !important;
-    background: #f5eee7 !important;
-    color: #333 !important;
-    border: 1px solid rgba(0, 0, 0, 0.16) !important;
-    border-radius: 0 !important;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.18) !important;
-    font-family: inherit !important;
-    font-size: 0.875rem !important;
-    overflow: hidden !important;
-    z-index: 999999 !important;
-  }
-  
-  .flatpickr-calendar::before,
-  .flatpickr-calendar::after {
-    display: none !important;
-  }
-  
-  /* ==========================================================================
-     DATEPICKER MONTH HEADER
-  ========================================================================== */
-  
-  .flatpickr-months {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    height: 2.75rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-  
-  .flatpickr-month {
-    height: 2.75rem !important;
-    color: #333 !important;
-    fill: #333 !important;
-  }
-  
-  .flatpickr-current-month {
-    top: 0 !important;
-    left: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 2.75rem !important;
-    padding: 0 !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-  }
-  
-  .flatpickr-current-month .flatpickr-monthDropdown-months {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    padding: 0 !important;
-    margin: 0 0.35rem 0 0 !important;
-    background: transparent !important;
-    color: #333 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    font: inherit !important;
-    font-weight: 500 !important;
-  }
-  
-  .flatpickr-current-month input.cur-year {
-    height: auto !important;
-    padding: 0 !important;
-    color: #333 !important;
-    font: inherit !important;
-    font-weight: 500 !important;
-  }
-  
-  .flatpickr-current-month .numInputWrapper span {
-    display: none !important;
-  }
-  
-  /* ==========================================================================
-     DATEPICKER NAVIGATION
-  ========================================================================== */
-  
-  .flatpickr-prev-month,
-  .flatpickr-next-month {
-    top: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 2.75rem !important;
-    height: 2.75rem !important;
-    padding: 0 !important;
-    color: #333 !important;
-    fill: #333 !important;
-  }
-  
-  .flatpickr-prev-month {
-    left: 0 !important;
-  }
-  
-  .flatpickr-next-month {
-    right: 0 !important;
-  }
-  
-  .flatpickr-prev-month:hover,
-  .flatpickr-next-month:hover {
-    background: rgba(0, 0, 0, 0.05) !important;
-  }
-  
-  .flatpickr-prev-month svg,
-  .flatpickr-next-month svg {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
-    fill: currentColor !important;
-  }
-  
-  /* ==========================================================================
-     DATEPICKER WEEKDAYS
-  ========================================================================== */
-  
-  .flatpickr-weekdays {
-    height: 2.25rem !important;
-  }
-  
-  .flatpickr-weekdaycontainer {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-  }
-  
-  span.flatpickr-weekday {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 2.25rem !important;
-    color: rgba(51, 51, 51, 0.55) !important;
-    font-size: 0.7rem !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-  }
-  
-  /* ==========================================================================
-     DATEPICKER DAYS
-  ========================================================================== */
-  
-  .flatpickr-innerContainer,
-  .flatpickr-rContainer,
-  .flatpickr-days {
-    width: 100% !important;
-  }
-  
-  .dayContainer {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  .flatpickr-day {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    max-width: none !important;
-    height: 2.35rem !important;
-    margin: 0 !important;
-    color: #333 !important;
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    font-size: 0.8rem !important;
-    line-height: 1 !important;
-  }
-  
-  .flatpickr-day.prevMonthDay,
-  .flatpickr-day.nextMonthDay {
-    color: rgba(51, 51, 51, 0.25) !important;
-  }
-  
-  .flatpickr-day:hover,
-  .flatpickr-day:focus {
-    color: #333 !important;
-    background: rgba(0, 0, 0, 0.07) !important;
-  }
-  
-  .flatpickr-day.today {
-    color: #333 !important;
-    background: transparent !important;
-    border: 1px solid rgba(51, 51, 51, 0.45) !important;
-  }
-  
-  .flatpickr-day.selected,
-  .flatpickr-day.selected:hover,
-  .flatpickr-day.startRange,
-  .flatpickr-day.endRange {
-    color: #f5eee7 !important;
-    background: #333 !important;
-    border-color: #333 !important;
-  }
-  
-  .flatpickr-day.flatpickr-disabled,
-  .flatpickr-day.flatpickr-disabled:hover {
-    color: rgba(51, 51, 51, 0.2) !important;
-    background: transparent !important;
-    cursor: not-allowed !important;
-  }
-  
-  /* ==========================================================================
-     RESPONSIVE
-  ========================================================================== */
-  
-  @media screen and (max-width: 479px) {
-    .flatpickr-calendar {
-      width: calc(100vw - 2rem) !important;
-      max-width: calc(100vw - 2rem) !important;
-      padding: 0.75rem !important;
+
+  /* ------------------------------------------------------------------------
+     INITIALIZE ONE PHONE INPUT
+  ------------------------------------------------------------------------ */
+
+  function initializePhoneInput(input) {
+    if (!input || input.dataset.itiInitialized === "true") return;
+
+    input.dataset.itiInitialized = "true";
+
+    const originalName =
+      input.getAttribute("name") || "Phone-number";
+
+    const fullNumberName =
+      originalName + "-full";
+
+    const countryName =
+      originalName + "-country";
+
+    const iti = window.intlTelInput(input, {
+      allowDropdown: true,
+      separateDialCode: true,
+      showSelectedDialCode: true,
+      countrySearch: true,
+      nationalMode: true,
+      autoPlaceholder: "polite",
+
+      initialCountryLookup: detectVisitorCountry,
+
+      loadUtils: function () {
+        return import(
+          "https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/js/utils.js"
+        );
+      },
+
+      hiddenInput: function () {
+        return {
+          phone: fullNumberName,
+          country: countryName
+        };
+      }
+    });
+
+    input._intlTelInputInstance = iti;
+
+    /* ----------------------------------------------------------------------
+       PRESERVE VALIDATED FIELD SPACING
+    ---------------------------------------------------------------------- */
+
+    function preserveFieldSpacing() {
+      input.style.setProperty(
+        "padding-left",
+        "6rem",
+        "important"
+      );
+
+      const wrapper =
+        input.closest(".iti");
+
+      if (!wrapper) return;
+
+      const selectedCountry =
+        wrapper.querySelector(
+          ".iti__selected-country"
+        );
+
+      const selectedCountryPrimary =
+        wrapper.querySelector(
+          ".iti__selected-country-primary"
+        );
+
+      if (selectedCountry) {
+        selectedCountry.style.setProperty(
+          "padding",
+          "0",
+          "important"
+        );
+      }
+
+      if (selectedCountryPrimary) {
+        selectedCountryPrimary.style.setProperty(
+          "padding",
+          "0",
+          "important"
+        );
+      }
     }
-  
-    .flatpickr-day {
-      height: 2.5rem !important;
+
+    preserveFieldSpacing();
+    requestAnimationFrame(preserveFieldSpacing);
+
+    setTimeout(
+      preserveFieldSpacing,
+      100
+    );
+
+    setTimeout(
+      preserveFieldSpacing,
+      500
+    );
+
+    input.addEventListener(
+      "countrychange",
+      preserveFieldSpacing
+    );
+
+    /* ----------------------------------------------------------------------
+       COUNTRY FALLBACK
+    ---------------------------------------------------------------------- */
+
+    detectVisitorCountry().then(function (countryCode) {
+      const selectedCountry =
+        iti.getSelectedCountryData();
+
+      if (
+        !selectedCountry ||
+        !selectedCountry.iso2
+      ) {
+        iti.setCountry(
+          countryCode || "ma"
+        );
+      }
+
+      preserveFieldSpacing();
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     INITIALIZE ALL PHONE INPUTS
+  ------------------------------------------------------------------------ */
+
+  function initializeAllPhoneInputs(root) {
+    const context =
+      root || document;
+
+    if (
+      context.matches &&
+      context.matches(
+        ".text--field.is--phone"
+      )
+    ) {
+      initializePhoneInput(context);
+    }
+
+    if (
+      typeof context.querySelectorAll === "function"
+    ) {
+      context
+        .querySelectorAll(
+          ".text--field.is--phone"
+        )
+        .forEach(
+          initializePhoneInput
+        );
     }
   }
+
+  initializeAllPhoneInputs(document);
+
+  /* ------------------------------------------------------------------------
+     WATCH DYNAMICALLY ADDED GUEST FIELDS
+  ------------------------------------------------------------------------ */
+
+  const observer =
+    new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (!(node instanceof HTMLElement)) return;
+
+          initializeAllPhoneInputs(node);
+        });
+      });
+    });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+
+/* ==========================================================================
+   DATE PICKERS - PAIRS LOGIC
+========================================================================== */
+
+function initializeDatePickers() {
+  if (typeof window.flatpickr !== "function") {
+    console.warn("Flatpickr n'est pas chargé.");
+    return;
+  }
+
+  const dateInputs = Array.from(
+    document.querySelectorAll(
+      ".text--field.is--date"
+    )
+  );
+
+  if (!dateInputs.length) return;
+
+  const datePickers = [];
+
+  /* ------------------------------------------------------------------------
+     INITIALIZE ALL DATE INPUTS
+  ------------------------------------------------------------------------ */
+
+  dateInputs.forEach(function (input) {
+    if (
+      input.dataset.datepickerInitialized === "true"
+    ) {
+      return;
+    }
+
+    input.dataset.datepickerInitialized = "true";
+
+    const picker =
+      window.flatpickr(input, {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "F j, Y",
+
+        allowInput: false,
+        clickOpens: true,
+        disableMobile: true,
+        minDate: "today",
+        monthSelectorType: "static",
+
+        locale: {
+          firstDayOfWeek: 1
+        },
+
+        onReady: function (
+          selectedDates,
+          dateStr,
+          instance
+        ) {
+          const visibleInput =
+            instance.altInput;
+
+          if (!visibleInput) return;
+
+          visibleInput.className =
+            input.className;
+
+          visibleInput.classList.add(
+            "flatpickr-input"
+          );
+
+          visibleInput.placeholder =
+            input.getAttribute("placeholder") ||
+            "Select a date";
+
+          visibleInput.style.setProperty(
+            "padding-left",
+            "1.25rem",
+            "important"
+          );
+
+          visibleInput.style.setProperty(
+            "padding-right",
+            "1.25rem",
+            "important"
+          );
+
+          visibleInput.style.setProperty(
+            "background",
+            "transparent",
+            "important"
+          );
+        }
+      });
+
+    input._flatpickrInstance =
+      picker;
+
+    datePickers.push(picker);
+  });
+
+  /* ------------------------------------------------------------------------
+     CONNECT DATE INPUTS BY PAIRS
+
+     Pair 1: input 1 + input 2
+     Pair 2: input 3 + input 4
+     Pair 3: input 5 + input 6
+  ------------------------------------------------------------------------ */
+
+  for (
+    let index = 0;
+    index < datePickers.length;
+    index += 2
+  ) {
+    const firstPicker =
+      datePickers[index];
+
+    const secondPicker =
+      datePickers[index + 1];
+
+    if (
+      !firstPicker ||
+      !secondPicker
+    ) {
+      continue;
+    }
+
+    firstPicker.config.onChange.push(
+      function (selectedDates) {
+        const firstDate =
+          selectedDates[0];
+
+        if (!firstDate) {
+          secondPicker.set(
+            "minDate",
+            "today"
+          );
+
+          return;
+        }
+
+        /*
+         * La deuxième date doit être strictement
+         * après la première date.
+         */
+        const nextDay =
+          new Date(firstDate);
+
+        nextDay.setDate(
+          nextDay.getDate() + 1
+        );
+
+        secondPicker.set(
+          "minDate",
+          nextDay
+        );
+
+        const currentSecondDate =
+          secondPicker.selectedDates[0];
+
+        if (
+          currentSecondDate &&
+          currentSecondDate < nextDay
+        ) {
+          secondPicker.clear();
+        }
+      }
+    );
+
+    /* ----------------------------------------------------------------------
+       INITIAL VALUE
+    ---------------------------------------------------------------------- */
+
+    const initialFirstDate =
+      firstPicker.selectedDates[0];
+
+    if (initialFirstDate) {
+      const nextDay =
+        new Date(initialFirstDate);
+
+      nextDay.setDate(
+        nextDay.getDate() + 1
+      );
+
+      secondPicker.set(
+        "minDate",
+        nextDay
+      );
+    }
+  }
+}
