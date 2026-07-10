@@ -197,3 +197,165 @@ body {
   opacity: 0;
   pointer-events: none;
 }
+
+/* ==========================================================================
+   HERO TITLE - BASE
+========================================================================== */
+
+.hero--title {
+  --text-gap: 1.5rem;
+  --animation-duration: 0.85s;
+  --logo-width: 2.8rem;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  overflow: visible;
+}
+
+
+/* ==========================================================================
+   TEXT WRAPPERS
+========================================================================== */
+
+.hero--title > div {
+  position: relative;
+  z-index: 1;
+
+  width: 0;
+  overflow: visible;
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  transition:
+    width var(--animation-duration) cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero--title > div p {
+  margin: 0;
+
+  opacity: 0;
+  filter: blur(4px);
+
+  transition:
+    transform var(--animation-duration) cubic-bezier(.22, 1, .36, 1),
+    opacity 0.45s ease,
+    filter var(--animation-duration) cubic-bezier(.22, 1, .36, 1);
+
+  will-change: transform, opacity, filter;
+}
+
+
+/* ==========================================================================
+   LEFT TEXT
+========================================================================== */
+
+.hero--title > div:first-child {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hero--title > div:first-child p {
+  transform: translateX(calc(100% + var(--logo-width)));
+}
+
+
+/* ==========================================================================
+   RIGHT TEXT
+========================================================================== */
+
+.hero--title > div:last-child {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.hero--title > div:last-child p {
+  transform: translateX(calc(-100% - var(--logo-width)));
+}
+
+
+/* ==========================================================================
+   CENTER LOGO
+========================================================================== */
+
+.hero--title .brand--hero {
+  position: relative;
+  z-index: 3;
+
+  display: block;
+  flex-shrink: 0;
+
+  width: var(--logo-width);
+  height: auto;
+
+  background: inherit;
+
+  transform: scale(1);
+  transition:
+    transform var(--animation-duration) cubic-bezier(.22, 1, .36, 1);
+
+  will-change: transform;
+}
+
+
+/* ==========================================================================
+   HOVER REVEAL
+========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .hero--title:hover > div:first-child {
+    width: max-content;
+    margin-right: var(--text-gap);
+  }
+
+  .hero--title:hover > div:last-child {
+    width: max-content;
+    margin-left: var(--text-gap);
+  }
+
+  .hero--title:hover > div p {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+
+  .hero--title:hover .brand--hero {
+    transform: scale(1.06);
+  }
+}
+
+
+/* ==========================================================================
+   SMOOTH SPACING
+========================================================================== */
+
+.hero--title > div:first-child {
+  margin-right: 0;
+  transition:
+    width var(--animation-duration) cubic-bezier(.22, 1, .36, 1),
+    margin-right var(--animation-duration) cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero--title > div:last-child {
+  margin-left: 0;
+  transition:
+    width var(--animation-duration) cubic-bezier(.22, 1, .36, 1),
+    margin-left var(--animation-duration) cubic-bezier(.22, 1, .36, 1);
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION
+========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero--title > div,
+  .hero--title > div p,
+  .hero--title .brand--hero {
+    transition-duration: 0.01ms !important;
+  }
+}
